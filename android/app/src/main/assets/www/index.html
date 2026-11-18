@@ -26,7 +26,25 @@
 let tamil=false,stars=Number(localStorage.getItem('aadhi-stars')||0),selectedFeeling='';const $=id=>document.getElementById(id);$('starCount').textContent=stars;
 const labels={feelings:'My Feelings / என் உணர்வுகள்',learn:'Learning Garden / கற்றல் பூங்கா',buddy:'Aadhi Buddy / ஆதியின் நண்பன்',kindness:'Kindness Club / அன்பு நண்பர்கள்',stories:'Story Time / கதை நேரம்',games:'Play & Think / விளையாடி சிந்திப்போம்'};
 function earnStar(){stars++;localStorage.setItem('aadhi-stars',stars);$('starCount').textContent=stars;$('parentStars').textContent=stars}
-function say(text,lang){if(!('speechSynthesis'in window)){showMessage('Voice is not available on this device. Ask a grown-up to check the language voice settings.');return}speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(text);u.lang=lang|| (tamil?'ta-IN':'en-IN');let v=speechSynthesis.getVoices().find(x=>x.lang.toLowerCase().startsWith(u.lang.slice(0,2)));if(v)u.voice=v;speechSynthesis.speak(u)}
+function say(text, lang) {
+    lang = lang || (tamil ? 'ta-IN' : 'en-IN');
+
+    if (window.AadhiVoice && typeof window.AadhiVoice.speak === 'function') {
+        window.AadhiVoice.stop();
+        window.AadhiVoice.speak(text, lang);
+        return;
+    }
+
+    if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+        const voice = new SpeechSynthesisUtterance(text);
+        voice.lang = lang;
+        voice.rate = 0.85;
+        speechSynthesis.speak(voice);
+    } else {
+        alert('Voice is not available on this device.');
+    }
+}
 function showMessage(s){$('reply').innerHTML='<div class="chatline">'+s+'</div>'}
 function show(title,body){$('activityTitle').textContent=title;$('activityBody').innerHTML=body;$('activity').classList.add('show');$('activity').scrollIntoView({behavior:'smooth',block:'nearest'})}
 function closePage(){$('activity').classList.remove('show');$('parents').classList.remove('show')}
