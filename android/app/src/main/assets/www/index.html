@@ -1,67 +1,672 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff4d6"><meta name="description" content="Aadhi AI — a playful Tamil and English learning and feelings app for little children.">
-<title>Aadhi AI – Learn, Feel & Grow</title><link rel="manifest" href="manifest.webmanifest">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#fff4d6">
+<meta name="description" content="Aadhi AI - Tamil and English preschool learning app">
+<title>Aadhi AI - Learn, Feel & Grow</title>
+
 <style>
-:root{--ink:#342f48;--purple:#7056d9;--pink:#ffe4ee;--yellow:#fff1bd;--mint:#dff8ec;--blue:#e3f2ff;--line:#eee8f5;--coral:#ff927e}*{box-sizing:border-box}body{margin:0;background:#fffdf9;color:var(--ink);font-family:system-ui,"Noto Sans Tamil",sans-serif}button{font:inherit;cursor:pointer;border:0}.wrap{max-width:880px;margin:auto;padding:16px 16px 88px}header{display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{display:flex;align-items:center;gap:10px}.mascot{font-size:40px;background:var(--yellow);border-radius:17px;padding:4px 10px}.brand h1{font-size:21px;margin:0}.brand small{color:#756d85}.pill,.btn{border-radius:15px;padding:10px 14px;font-weight:800}.pill{background:#f2edff;color:#5e48b8}.btn{background:var(--purple);color:#fff}.btn.secondary{background:#f2edff;color:#5e48b8}.hero{margin:17px 0;background:linear-gradient(125deg,var(--yellow),var(--pink) 58%,#e5e5ff);border-radius:27px;padding:23px;text-align:center}.hero .eyebrow{font-weight:900;letter-spacing:.08em;color:#7654b7;font-size:12px}.hero h2{font-size:clamp(25px,5vw,36px);margin:6px 0}.hero p{margin:5px}.friends{font-size:45px;margin:10px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.stars{font-weight:900;color:#ad7918}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:12px 0}.tile{background:#fff;border:1px solid var(--line);border-radius:20px;padding:15px;text-align:left;min-height:112px;box-shadow:0 3px 12px #33225508;color:var(--ink)}.tile .emoji{font-size:31px}.tile b{display:block;margin:5px 0 3px}.tile small{color:#776f87}.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:22px;padding:17px;margin:15px 0}.panel.show{display:block}.panel h3{margin:0 0 12px}.big{font-size:56px;text-align:center;margin:10px}.answers{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.answer{background:#faf8ff;border:1px solid var(--line);border-radius:15px;padding:13px;font-weight:800;color:var(--ink);min-height:52px}.answer.good{background:#e6f8e9;border-color:#7cc98a}.note{background:#f8f5ff;padding:12px;border-radius:14px;font-size:13px;color:#61577a;line-height:1.5}.feelings{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.feeling{border:2px solid transparent;border-radius:18px;padding:10px 4px;background:#faf8ff;font-weight:800;color:var(--ink)}.feeling .face{display:block;font-size:34px}.feeling.selected{border-color:var(--purple);background:#f1edff}.breath{margin:16px auto;width:130px;height:130px;border-radius:50%;background:linear-gradient(135deg,#b7e9d3,#dcd2ff);display:grid;place-items:center;font-weight:900;animation:breathe 7s ease-in-out infinite}@keyframes breathe{0%,100%{transform:scale(.82)}50%{transform:scale(1.12)}}.chatline{background:#f2efff;border-radius:15px;padding:12px;margin:10px 0;line-height:1.5}.inputrow{display:flex;gap:8px}.inputrow input{min-width:0;flex:1;border:1px solid var(--line);border-radius:13px;padding:12px;font:inherit}nav{position:fixed;bottom:0;left:0;right:0;background:#fffefaee;backdrop-filter:blur(12px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:9px max(8px,env(safe-area-inset-right)) calc(9px + env(safe-area-inset-bottom));z-index:5}nav button{background:none;color:#716a80;font-size:11px;font-weight:800;min-width:58px}nav button span{display:block;font-size:21px;margin-bottom:2px}footer{text-align:center;color:#8c8598;font-size:11px;margin:18px}.hidden{display:none!important}.lesson-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}@media(min-width:650px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.feelings{grid-template-columns:repeat(6,1fr)}}
-</style></head>
-<body><div class="wrap">
-<header><div class="brand"><div class="mascot">⭐</div><div><h1>Aadhi AI</h1><small>கற்போம் • உணர்வோம் • வளர்வோம்</small></div></div><button class="pill" id="languageBtn" aria-label="Change language">தமிழ்</button></header>
-<section class="hero"><div class="eyebrow">A HAPPY LITTLE WORLD 🌈</div><h2 id="welcome">Hello, little star!</h2><p id="welcomeSub">Let's learn, understand feelings and grow together.</p><div class="friends">🐻 🐰 🐘</div><button class="btn" onclick="openPage('learn')" id="startBtn">Let's begin ▶</button></section>
-<div class="row"><h3 id="chooseTitle">Choose your adventure</h3><div class="stars">⭐ <span id="starCount">0</span></div></div>
-<div class="grid">
-<button class="tile" onclick="openPage('feelings')"><div class="emoji">💗</div><b>My Feelings / என் உணர்வுகள்</b><small>Understand emotions</small></button>
-<button class="tile" onclick="openPage('learn')"><div class="emoji">🔤</div><b>Learn / கற்கலாம்</b><small>Letters, numbers & colours</small></button>
-<button class="tile" onclick="openPage('buddy')"><div class="emoji">🤖</div><b>Aadhi Buddy</b><small>Talk, ask and explore</small></button>
-<button class="tile" onclick="openPage('kindness')"><div class="emoji">🤝</div><b>Kindness Club</b><small>Sharing, caring & manners</small></button>
-<button class="tile" onclick="openPage('stories')"><div class="emoji">📖</div><b>Story Time / கதை நேரம்</b><small>Little bilingual stories</small></button>
-<button class="tile" onclick="openPage('games')"><div class="emoji">🧩</div><b>Play & Think</b><small>Fun mini games</small></button>
-</div>
-<section class="panel" id="activity"><div class="row"><h3 id="activityTitle">Let's explore!</h3><button class="pill" onclick="closePage()">Close ✕</button></div><div id="activityBody"></div></section>
-<section class="panel" id="parents"><h3>👨‍👩‍👧 Grown-up corner</h3><p>Stars collected on this device: <b id="parentStars">0</b></p><p>Suggested use: short 10–15 minute sessions with a trusted adult nearby.</p><p class="note">This prototype stores only a star count and language choice on this device. The parent gate is a simple demo, not secure authentication. No child account, microphone recording or location tracking is used.</p><button class="btn secondary" onclick="document.getElementById('parents').classList.remove('show')">Close</button></section>
-<footer>Aadhi AI · Learn • Feel • Grow · Made for little learners</footer></div>
-<nav><button onclick="closePage()"><span>🏠</span>Home</button><button onclick="openPage('feelings')"><span>💗</span>Feelings</button><button onclick="openPage('learn')"><span>📚</span>Learn</button><button onclick="openPage('buddy')"><span>🤖</span>Buddy</button><button onclick="parentGate()"><span>👨‍👩‍👧</span>Parents</button></nav>
-<script>
-let tamil=false,stars=Number(localStorage.getItem('aadhi-stars')||0),selectedFeeling='';const $=id=>document.getElementById(id);$('starCount').textContent=stars;
-const labels={feelings:'My Feelings / என் உணர்வுகள்',learn:'Learning Garden / கற்றல் பூங்கா',buddy:'Aadhi Buddy / ஆதியின் நண்பன்',kindness:'Kindness Club / அன்பு நண்பர்கள்',stories:'Story Time / கதை நேரம்',games:'Play & Think / விளையாடி சிந்திப்போம்'};
-function earnStar(){stars++;localStorage.setItem('aadhi-stars',stars);$('starCount').textContent=stars;$('parentStars').textContent=stars}
-function say(text, lang) {
-    lang = lang || (tamil ? 'ta-IN' : 'en-IN');
-
-    if (window.AadhiVoice && typeof window.AadhiVoice.speak === 'function') {
-        window.AadhiVoice.stop();
-        window.AadhiVoice.speak(text, lang);
-        return;
-    }
-
-    if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        const voice = new SpeechSynthesisUtterance(text);
-        voice.lang = lang;
-        voice.rate = 0.85;
-        speechSynthesis.speak(voice);
-    } else {
-        alert('Voice is not available on this device.');
-    }
+:root {
+  --ink:#342f48;
+  --purple:#7056d9;
+  --pink:#ffe4ee;
+  --yellow:#fff1bd;
+  --mint:#dff8ec;
+  --blue:#e3f2ff;
+  --line:#eee8f5;
+  --coral:#ff927e;
 }
-function showMessage(s){$('reply').innerHTML='<div class="chatline">'+s+'</div>'}
-function show(title,body){$('activityTitle').textContent=title;$('activityBody').innerHTML=body;$('activity').classList.add('show');$('activity').scrollIntoView({behavior:'smooth',block:'nearest'})}
-function closePage(){$('activity').classList.remove('show');$('parents').classList.remove('show')}
-function openPage(id){const pages={
-feelings:['💗 '+labels.feelings,`<p>How are you feeling today? / இன்று உங்களுக்கு எப்படி இருக்கிறது?</p><div class="feelings">${[['😊','Happy','மகிழ்ச்சி'],['😢','Sad','சோகம்'],['😠','Angry','கோபம்'],['😟','Worried','கவலை'],['😌','Calm','அமைதி'],['🤩','Excited','உற்சாகம்']].map((x,i)=>`<button class="feeling" onclick="chooseFeeling(this,'${x[1]}','${x[2]}')"><span class="face">${x[0]}</span>${x[1]}<small>${x[2]}</small></button>`).join('')}</div><div id="feelingReply"></div>`],
-learn:['📚 '+labels.learn,`<p>Choose something to learn! / எதை கற்கலாம்?</p><div class="answers"><button class="answer" onclick="lesson('letters')">🔤 ABC & அ ஆ இ</button><button class="answer" onclick="lesson('numbers')">🔢 Count 1–10 / எண்கள்</button><button class="answer" onclick="lesson('colours')">🎨 Colours / நிறங்கள்</button><button class="answer" onclick="lesson('animals')">🐘 Animals / விலங்குகள்</button><button class="answer" onclick="lesson('shapes')">🔺 Shapes / வடிவங்கள்</button><button class="answer" onclick="lesson('body')">🖐️ My body / உடல்</button></div><div id="lessonArea"></div>`],
-buddy:['🤖 '+labels.buddy,`<div class="chatline">Vanakkam! வணக்கம்! I'm Aadhi, your friendly learning buddy. Choose a question below. / கீழே ஒரு கேள்வியைத் தேர்வு செய்.</div><div class="answers"><button class="answer" onclick="buddy('feel')">What can I do when I feel angry? / கோபம் வந்தால்?</button><button class="answer" onclick="buddy('friend')">How can I help a friend? / நண்பருக்கு எப்படி உதவலாம்?</button><button class="answer" onclick="buddy('count')">Let's count together! / எண்ணலாம்!</button><button class="answer" onclick="buddy('hello')">Teach me a Tamil word / தமிழ் சொல்</button></div><div id="buddyReply"></div><p class="note">Aadhi Buddy uses safe, pre-written learning conversations in this free offline version. It is not a live generative AI chat and does not send children's messages to a server.</p>`],
-kindness:['🤝 '+labels.kindness,`<p>What would you do? / நீங்கள் என்ன செய்வீர்கள்?</p><div class="chatline">Your friend dropped their crayons. / உங்கள் நண்பரின் வண்ண பென்சில்கள் கீழே விழுந்துவிட்டன.</div><div class="answers"><button class="answer" onclick="kindness(this,true)">Help pick them up / எடுத்து கொடுப்பேன்</button><button class="answer" onclick="kindness(this,false)">Walk away / போய்விடுவேன்</button></div><div id="kindReply"></div>`],
-stories:['📖 '+labels.stories,`<div class="big">🐘 🌳 🐦</div><h3>The Kind Little Elephant / அன்பான குட்டி யானை</h3><p>One sunny day, a little elephant saw a bird whose nest had fallen. The elephant gently helped the bird build it again. They became friends.</p><p>ஒரு நாள் குட்டி யானை, கூடு கீழே விழுந்த பறவையைப் பார்த்தது. யானை அன்புடன் கூடு கட்ட உதவியது. இருவரும் நண்பர்களானார்கள்.</p><button class="btn" onclick="say('A little elephant helped a bird. Helping friends is kind.','en-IN')">🔊 Listen in English</button> <button class="btn secondary" onclick="say('குட்டி யானை பறவைக்கு உதவியது. நண்பர்களுக்கு உதவுவது நல்லது.','ta-IN')">🔊 தமிழில் கேள்</button><p>What did the elephant do? / யானை என்ன செய்தது?</p><button class="answer" onclick="earnStar();this.textContent='⭐ Correct! நன்று!'">Helped the bird / பறவைக்கு உதவியது</button>`],
-games:['🧩 '+labels.games,`<p>Which one is a fruit? / பழம் எது?</p><div class="answers"><button class="answer" onclick="gameAnswer(this,false)">🚗 Car</button><button class="answer" onclick="gameAnswer(this,true)">🍌 Banana</button><button class="answer" onclick="gameAnswer(this,false)">🐘 Elephant</button></div><div id="gameReply"></div>`]};show(...pages[id]);}
-function chooseFeeling(el,en,ta){document.querySelectorAll('.feeling').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');selectedFeeling=en;let response={Happy:'That is lovely! What made you smile today? / அருமை! இன்று உங்களை சிரிக்க வைத்தது எது?',Sad:'It is okay to feel sad. Would a hug, a story or talking to a grown-up help? / சோகமாக இருப்பது பரவாயில்லை. அன்பாக பேசலாமா?',Angry:'It is okay to feel angry. Let us pause, breathe in slowly and breathe out. / கோபம் வருவது இயல்பு. மெதுவாக மூச்சை இழுத்து வெளியே விடுவோம்.',Worried:'You are not alone. Tell a trusted grown-up what is worrying you. / நீங்கள் தனியாக இல்லை. நம்பிக்கையான பெரியவரிடம் சொல்லுங்கள்.',Calm:'Lovely. Notice your slow breathing and relaxed body. / அருமை. மெதுவான மூச்சை கவனியுங்கள்.',Excited:'Wow! What are you excited to do? / ஆஹா! எதைச் செய்ய ஆவலாக இருக்கிறீர்கள்?'}[en];$('feelingReply').innerHTML=`<div class="chatline"><b>${en} / ${ta}</b><br>${response}</div><div class="breath">Breathe<br>மூச்சு</div><p>Let's take three gentle breaths together. / மூன்று முறை மெதுவாக மூச்சு விடுவோம்.</p><button class="btn" onclick="earnStar();this.textContent='⭐ You checked in! நன்று!'">I checked in / முடிந்தது</button>`;}
-function lesson(id){let data={letters:['A 🍎 அ அம்மா','B 🏀 ஆ ஆடு','C 🐱 இ இலை'],numbers:['1️⃣ 2️⃣ 3️⃣','4️⃣ 5️⃣ 6️⃣','7️⃣ 8️⃣ 9️⃣ 🔟'],colours:['❤️ Red – சிவப்பு','💙 Blue – நீலம்','💛 Yellow – மஞ்சள்','💚 Green – பச்சை'],animals:['🐘 Elephant – யானை','🐱 Cat – பூனை','🐶 Dog – நாய்'],shapes:['🔴 Circle – வட்டம்','🟦 Square – சதுரம்','🔺 Triangle – முக்கோணம்'],body:['👀 Eyes – கண்கள்','👂 Ears – காதுகள்','🖐️ Hands – கைகள்']}[id];let title={letters:'Letters / எழுத்துகள்',numbers:'Numbers / எண்கள்',colours:'Colours / நிறங்கள்',animals:'Animals / விலங்குகள்',shapes:'Shapes / வடிவங்கள்',body:'My body / உடல்'}[id];$('lessonArea').innerHTML=`<div class="chatline"><b>${title}</b><br>${data.join('<br>')}</div><button class="btn" onclick="earnStar();this.textContent='⭐ Great learning! நன்று!'">I learned this! / கற்றுக்கொண்டேன்</button>`;}
-function buddy(which){let m={feel:'When you feel angry, stop, take three slow breaths and tell a trusted grown-up. It is okay to have big feelings. / கோபம் வந்தால் நின்று, மெதுவாக மூச்சு விடுங்கள். நம்பிக்கையான பெரியவரிடம் சொல்லுங்கள்.',friend:'You can listen, share toys, use kind words and ask if your friend needs help. / கவனமாக கேளுங்கள், விளையாட்டு பொருட்களை பகிருங்கள், உதவி செய்யுங்கள்.',count:'One, two, three! ஒன்று, இரண்டு, மூன்று! ⭐',hello:'Vanakkam means Hello! வணக்கம்!'}[which];$('buddyReply').innerHTML='<div class="chatline">'+m+'</div>';}
-function kindness(el,ok){if(ok){el.classList.add('good');$('kindReply').innerHTML='<div class="chatline">Wonderful! Helping is kind. / அருமை! உதவுவது அன்பான செயல். ⭐</div>';earnStar()}else $('kindReply').innerHTML='<div class="chatline">Let us think about how our friend feels. We can help! / நண்பருக்கு உதவலாம்.</div>'}
-function gameAnswer(el,ok){if(ok){el.classList.add('good');$('gameReply').textContent='Well done! Banana is a fruit. நன்று!';earnStar()}else $('gameReply').textContent='Try again! மீண்டும் முயற்சி செய்!'}
-function parentGate(){let a=prompt('Grown-up check: What is 6 + 2?');if(a==='8'){$('parents').classList.add('show');$('parentStars').textContent=stars}else alert('Please ask a grown-up to help.')}
-$('languageBtn').onclick=()=>{tamil=!tamil;$('languageBtn').textContent=tamil?'English':'தமிழ்';$('welcome').textContent=tamil?'வணக்கம் குட்டி நட்சத்திரமே!':'Hello, little star!';$('welcomeSub').textContent=tamil?'கற்போம், உணர்வுகளைப் புரிந்துகொள்வோம், ஒன்றாக வளர்வோம்.':"Let's learn, understand feelings and grow together.";$('startBtn').textContent=tamil?'தொடங்கலாம் ▶':"Let's begin ▶";localStorage.setItem('aadhi-lang',tamil?'ta':'en')};
-if(localStorage.getItem('aadhi-lang')==='ta')$('languageBtn').click();
-if('serviceWorker'in navigator && location.protocol!=='file:')window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
-</script></body></html>
+* {box-sizing:border-box}
+body {
+  margin:0;
+  background:#fffdf9;
+  color:var(--ink);
+  font-family:system-ui,"Noto Sans Tamil",sans-serif;
+}
+button {font:inherit;cursor:pointer;border:0}
+.wrap {max-width:880px;margin:auto;padding:16px 16px 90px}
+header {display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand {display:flex;align-items:center;gap:10px}
+.mascot {font-size:40px;background:var(--yellow);border-radius:17px;padding:4px 10px}
+.brand h1 {font-size:21px;margin:0}
+.brand small {color:#756d85}
+.pill,.btn {border-radius:15px;padding:11px 15px;font-weight:800}
+.pill {background:#f2edff;color:#5e48b8}
+.btn {background:var(--purple);color:white}
+.btn.secondary {background:#f2edff;color:#5e48b8}
+.hero {
+  margin:17px 0;
+  background:linear-gradient(125deg,var(--yellow),var(--pink) 58%,#e5e5ff);
+  border-radius:27px;padding:23px;text-align:center;
+}
+.hero h2 {font-size:clamp(25px,5vw,36px);margin:6px 0}
+.hero p {margin:5px}
+.friends {font-size:45px;margin:10px}
+.grid {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin:12px 0}
+.tile {
+  background:white;border:1px solid var(--line);border-radius:20px;
+  padding:15px;text-align:left;min-height:112px;
+  box-shadow:0 3px 12px #33225508;color:var(--ink);
+}
+.tile .emoji {font-size:31px}
+.tile b {display:block;margin:5px 0 3px}
+.tile small {color:#776f87}
+.panel {
+  display:none;background:white;border:1px solid var(--line);
+  border-radius:22px;padding:17px;margin:15px 0;
+}
+.panel.show {display:block}
+.panel h3 {margin:0 0 12px}
+.big {font-size:65px;text-align:center;margin:14px}
+.answers {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.answer {
+  background:#faf8ff;border:1px solid var(--line);
+  border-radius:15px;padding:13px;font-weight:800;
+  color:var(--ink);min-height:52px;
+}
+.answer.good {background:#e6f8e9;border-color:#7cc98a}
+.note {background:#f8f5ff;padding:12px;border-radius:14px;font-size:13px;line-height:1.5}
+.row {display:flex;justify-content:space-between;align-items:center;gap:10px}
+.stars {font-weight:900;color:#ad7918}
+.lesson-card {
+  text-align:center;background:#fff8e8;border-radius:20px;padding:15px;margin:12px 0;
+}
+.lesson-letter {font-size:75px;color:#ef634d;font-weight:900;margin:8px}
+.lesson-word {font-size:27px;color:#277c65;font-weight:900}
+.lesson-count {font-size:14px;color:#756d85}
+.lesson-actions {display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.feelings {display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.feeling {border:2px solid transparent;border-radius:18px;padding:10px 4px;background:#faf8ff;font-weight:800;color:var(--ink)}
+.feeling .face {display:block;font-size:34px}
+.feeling.selected {border-color:var(--purple);background:#f1edff}
+.chatline {background:#f2efff;border-radius:15px;padding:12px;margin:10px 0;line-height:1.6}
+.breath {
+  margin:16px auto;width:130px;height:130px;border-radius:50%;
+  background:linear-gradient(135deg,#b7e9d3,#dcd2ff);
+  display:grid;place-items:center;font-weight:900;
+  animation:breathe 7s ease-in-out infinite;
+}
+@keyframes breathe {0%,100%{transform:scale(.82)}50%{transform:scale(1.12)}}
+nav {
+  position:fixed;bottom:0;left:0;right:0;background:#fffefaee;
+  backdrop-filter:blur(12px);border-top:1px solid var(--line);
+  display:flex;justify-content:space-around;
+  padding:9px 8px calc(9px + env(safe-area-inset-bottom));z-index:5;
+}
+nav button {background:none;color:#716a80;font-size:11px;font-weight:800;min-width:55px}
+nav button span {display:block;font-size:21px;margin-bottom:2px}
+footer {text-align:center;color:#8c8598;font-size:11px;margin:18px}
+@media(min-width:650px) {
+  .grid {grid-template-columns:repeat(3,minmax(0,1fr))}
+  .feelings {grid-template-columns:repeat(6,1fr)}
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<header>
+  <div class="brand">
+    <div class="mascot">⭐</div>
+    <div>
+      <h1>Aadhi AI</h1>
+      <small>கற்போம் • உணர்வோம் • வளர்வோம்</small>
+    </div>
+  </div>
+  <button class="pill" onclick="toggleLanguage()" id="languageBtn">தமிழ்</button>
+</header>
+
+<section class="hero">
+  <div>🌈 A HAPPY LITTLE WORLD</div>
+  <h2 id="welcome">Hello, little star!</h2>
+  <p id="welcomeSub">Let's learn, understand feelings and grow together.</p>
+  <div class="friends">🐻 🐰 🐘</div>
+  <button class="btn" onclick="openPage('learn')">Let's begin ▶</button>
+</section>
+
+<div class="row">
+  <h3>Choose your adventure</h3>
+  <div class="stars">⭐ <span id="starCount">0</span></div>
+</div>
+
+<div class="grid">
+  <button class="tile" onclick="openPage('learn')">
+    <div class="emoji">🔤</div><b>Alphabet School</b><small>தமிழ் & English</small>
+  </button>
+  <button class="tile" onclick="openPage('numbers')">
+    <div class="emoji">🔢</div><b>Numbers</b><small>எண்கள் 1–100</small>
+  </button>
+  <button class="tile" onclick="openPage('explore')">
+    <div class="emoji">🎨</div><b>Colours & Shapes</b><small>நிறங்கள் & வடிவங்கள்</small>
+  </button>
+  <button class="tile" onclick="openPage('animals')">
+    <div class="emoji">🐘</div><b>Animal World</b><small>விலங்குகள்</small>
+  </button>
+  <button class="tile" onclick="openPage('stories')">
+    <div class="emoji">📖</div><b>Story Time</b><small>கதை நேரம்</small>
+  </button>
+  <button class="tile" onclick="openPage('games')">
+    <div class="emoji">🧩</div><b>Play & Think</b><small>விளையாடி கற்போம்</small>
+  </button>
+  <button class="tile" onclick="openPage('rhymes')">
+    <div class="emoji">🎵</div><b>Rhymes</b><small>பாடல்கள்</small>
+  </button>
+  <button class="tile" onclick="openPage('feelings')">
+    <div class="emoji">💗</div><b>My Feelings</b><small>என் உணர்வுகள்</small>
+  </button>
+  <button class="tile" onclick="openPage('buddy')">
+    <div class="emoji">🤖</div><b>Aadhi Buddy</b><small>உங்கள் நண்பன்</small>
+  </button>
+  <button class="tile" onclick="openPage('kindness')">
+    <div class="emoji">🤝</div><b>Kindness Club</b><small>அன்பும் உதவியும்</small>
+  </button>
+</div>
+
+<section class="panel" id="activity">
+  <div class="row">
+    <h3 id="activityTitle">Let's explore!</h3>
+    <button class="pill" onclick="closePage()">Close ✕</button>
+  </div>
+  <div id="activityBody"></div>
+</section>
+
+<section class="panel" id="parents">
+  <h3>👨‍👩‍👧 Grown-up corner</h3>
+  <p>Stars collected: <b id="parentStars">0</b></p>
+  <p>Suggested use: short 10–15 minute sessions with a trusted adult nearby.</p>
+  <p class="note">This app stores learning stars and language preference on this device. This is a simple demonstration parent gate, not secure authentication. No child account, microphone recording or location tracking is used.</p>
+  <button class="btn secondary" onclick="$('parents').classList.remove('show')">Close</button>
+</section>
+
+<footer>Aadhi AI · Learn • Feel • Grow · Made for little learners</footer>
+</div>
+
+<nav>
+  <button onclick="closePage()"><span>🏠</span>Home</button>
+  <button onclick="openPage('learn')"><span>📚</span>Learn</button>
+  <button onclick="openPage('games')"><span>🧩</span>Games</button>
+  <button onclick="openPage('buddy')"><span>🤖</span>Buddy</button>
+  <button onclick="parentGate()"><span>👨‍👩‍👧</span>Parents</button>
+</nav>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let tamil = localStorage.getItem('aadhi-lang') === 'ta';
+let stars = Number(localStorage.getItem('aadhi-stars') || 0);
+let currentItems = [];
+let currentIndex = 0;
+let currentLanguage = 'en-IN';
+let quizScore = 0;
+
+$('starCount').textContent = stars;
+
+function earnStar() {
+  stars++;
+  localStorage.setItem('aadhi-stars', stars);
+  $('starCount').textContent = stars;
+  $('parentStars').textContent = stars;
+}
+
+function say(text, lang) {
+  lang = lang || (tamil ? 'ta-IN' : 'en-IN');
+
+  if (window.AadhiVoice && typeof window.AadhiVoice.speak === 'function') {
+    window.AadhiVoice.stop();
+    window.AadhiVoice.speak(text, lang);
+    return;
+  }
+
+  if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const voice = new SpeechSynthesisUtterance(text);
+    voice.lang = lang;
+    voice.rate = 0.85;
+    speechSynthesis.speak(voice);
+  } else {
+    alert('Voice is not available. Please check phone voice settings.');
+  }
+}
+
+function show(title, body) {
+  $('activityTitle').textContent = title;
+  $('activityBody').innerHTML = body;
+  $('activity').classList.add('show');
+  $('activity').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function closePage() {
+  $('activity').classList.remove('show');
+  $('parents').classList.remove('show');
+}
+
+function toggleLanguage() {
+  tamil = !tamil;
+  $('languageBtn').textContent = tamil ? 'English' : 'தமிழ்';
+  $('welcome').textContent = tamil ? 'வணக்கம் குட்டி நட்சத்திரமே!' : 'Hello, little star!';
+  $('welcomeSub').textContent = tamil
+    ? 'கற்போம், உணர்வுகளைப் புரிந்துகொள்வோம், ஒன்றாக வளர்வோம்.'
+    : "Let's learn, understand feelings and grow together.";
+  localStorage.setItem('aadhi-lang', tamil ? 'ta' : 'en');
+}
+
+if (tamil) {
+  $('languageBtn').textContent = 'English';
+  $('welcome').textContent = 'வணக்கம் குட்டி நட்சத்திரமே!';
+  $('welcomeSub').textContent = 'கற்போம், உணர்வுகளைப் புரிந்துகொள்வோம், ஒன்றாக வளர்வோம்.';
+}
+
+/* ALPHABET CONTENT */
+
+const vowels = [
+ ['அ','அம்மா','அ - அம்மா'],
+ ['ஆ','ஆடு','ஆ - ஆடு'],
+ ['இ','இலை','இ - இலை'],
+ ['ஈ','ஈ','ஈ - ஈ'],
+ ['உ','உடல்','உ - உடல்'],
+ ['ஊ','ஊஞ்சல்','ஊ - ஊஞ்சல்'],
+ ['எ','எலி','எ - எலி'],
+ ['ஏ','ஏணி','ஏ - ஏணி'],
+ ['ஐ','ஐந்து','ஐ - ஐந்து'],
+ ['ஒ','ஒட்டகம்','ஒ - ஒட்டகம்'],
+ ['ஓ','ஓடம்','ஓ - ஓடம்'],
+ ['ஔ','ஔவை','ஔ - ஔவை']
+];
+
+const consonants = [
+ ['க்','கல்','க் - கல்'],
+ ['ங்','சங்கு','ங் - சங்கு'],
+ ['ச்','சட்டை','ச் - சட்டை'],
+ ['ஞ்','மஞ்சள்','ஞ் - மஞ்சள்'],
+ ['ட்','பட்டம்','ட் - பட்டம்'],
+ ['ண்','மண்','ண் - மண்'],
+ ['த்','தமிழ்','த் - தமிழ்'],
+ ['ந்','நண்டு','ந் - நண்டு'],
+ ['ப்','பல்','ப் - பல்'],
+ ['ம்','மாம்பழம்','ம் - மாம்பழம்'],
+ ['ய்','யானை','ய் - யானை'],
+ ['ர்','ரதம்','ர் - ரதம்'],
+ ['ல்','லட்டு','ல் - லட்டு'],
+ ['வ்','வண்டி','வ் - வண்டி'],
+ ['ழ்','தமிழ்','ழ் - தமிழ்'],
+ ['ள்','பள்ளி','ள் - பள்ளி'],
+ ['ற்','பறவை','ற் - பறவை'],
+ ['ன்','நான்','ன் - நான்']
+];
+
+const english = [
+ ['A','Apple','A for Apple 🍎'],
+ ['B','Ball','B for Ball ⚽'],
+ ['C','Cat','C for Cat 🐱'],
+ ['D','Dog','D for Dog 🐶'],
+ ['E','Elephant','E for Elephant 🐘'],
+ ['F','Fish','F for Fish 🐟'],
+ ['G','Grapes','G for Grapes 🍇'],
+ ['H','Hen','H for Hen 🐔'],
+ ['I','Ice cream','I for Ice cream 🍦'],
+ ['J','Jug','J for Jug 🏺'],
+ ['K','Kite','K for Kite 🪁'],
+ ['L','Lion','L for Lion 🦁'],
+ ['M','Mango','M for Mango 🥭'],
+ ['N','Nest','N for Nest 🪺'],
+ ['O','Orange','O for Orange 🍊'],
+ ['P','Parrot','P for Parrot 🦜'],
+ ['Q','Queen','Q for Queen 👑'],
+ ['R','Rabbit','R for Rabbit 🐰'],
+ ['S','Sun','S for Sun ☀️'],
+ ['T','Tiger','T for Tiger 🐯'],
+ ['U','Umbrella','U for Umbrella ☂️'],
+ ['V','Van','V for Van 🚐'],
+ ['W','Watch','W for Watch ⌚'],
+ ['X','Xylophone','X for Xylophone 🎼'],
+ ['Y','Yak','Y for Yak 🐂'],
+ ['Z','Zebra','Z for Zebra 🦓']
+];
+
+function openPage(id) {
+  const pages = {
+    learn: ['🔤 Alphabet School', `
+      <p>Choose your alphabet lesson / எழுத்துகளைத் தேர்வு செய்க</p>
+      <div class="answers">
+        <button class="answer" onclick="startAlphabet('vowels')">தமிழ் உயிரெழுத்துகள்</button>
+        <button class="answer" onclick="startAlphabet('consonants')">தமிழ் மெய்யெழுத்துகள்</button>
+        <button class="answer" onclick="startAlphabet('english')">English A–Z</button>
+      </div>
+      <div id="lessonArea"></div>
+    `],
+
+    numbers: ['🔢 Numbers 1–100', `
+      <p>Let's learn numbers! / எண்களைக் கற்போம்!</p>
+      <div id="numberArea"></div>
+      <div class="lesson-actions">
+        <button class="btn secondary" onclick="numberMove(-1)">⬅ Previous</button>
+        <button class="btn" onclick="numberMove(1)">Next ➡</button>
+        <button class="btn secondary" onclick="sayNumber()">🔊 Listen</button>
+      </div>
+    `],
+
+    explore: ['🎨 Colours & Shapes', `
+      <h3>Colours / நிறங்கள்</h3>
+      <div class="answers">
+        <button class="answer" onclick="say('Red, சிவப்பு')">❤️ Red - சிவப்பு</button>
+        <button class="answer" onclick="say('Blue, நீலம்')">💙 Blue - நீலம்</button>
+        <button class="answer" onclick="say('Yellow, மஞ்சள்')">💛 Yellow - மஞ்சள்</button>
+        <button class="answer" onclick="say('Green, பச்சை')">💚 Green - பச்சை</button>
+        <button class="answer" onclick="say('Orange, ஆரஞ்சு')">🧡 Orange - ஆரஞ்சு</button>
+        <button class="answer" onclick="say('Pink, இளஞ்சிவப்பு')">🩷 Pink - இளஞ்சிவப்பு</button>
+        <button class="answer" onclick="say('Purple, ஊதா')">💜 Purple - ஊதா</button>
+        <button class="answer" onclick="say('Black, கருப்பு')">🖤 Black - கருப்பு</button>
+      </div>
+      <h3>Shapes / வடிவங்கள்</h3>
+      <div class="answers">
+        <button class="answer" onclick="say('Circle, வட்டம்')">🔴 Circle - வட்டம்</button>
+        <button class="answer" onclick="say('Square, சதுரம்')">🟦 Square - சதுரம்</button>
+        <button class="answer" onclick="say('Triangle, முக்கோணம்')">🔺 Triangle - முக்கோணம்</button>
+        <button class="answer" onclick="say('Rectangle, செவ்வகம்')">▭ Rectangle - செவ்வகம்</button>
+        <button class="answer" onclick="say('Star, நட்சத்திரம்')">⭐ Star - நட்சத்திரம்</button>
+        <button class="answer" onclick="say('Heart, இதயம்')">❤️ Heart - இதயம்</button>
+      </div>
+    `],
+
+    animals: ['🐘 Animal World', `
+      <p>Tap an animal to hear its name and sound!</p>
+      <div class="answers">
+        <button class="answer" onclick="animal('Elephant','யானை','🐘','Trumpet!')">🐘 Elephant - யானை</button>
+        <button class="answer" onclick="animal('Lion','சிங்கம்','🦁','Roar!')">🦁 Lion - சிங்கம்</button>
+        <button class="answer" onclick="animal('Dog','நாய்','🐶','Woof woof!')">🐶 Dog - நாய்</button>
+        <button class="answer" onclick="animal('Cat','பூனை','🐱','Meow!')">🐱 Cat - பூனை</button>
+        <button class="answer" onclick="animal('Cow','பசு','🐮','Moo!')">🐮 Cow - பசு</button>
+        <button class="answer" onclick="animal('Horse','குதிரை','🐴','Neigh!')">🐴 Horse - குதிரை</button>
+        <button class="answer" onclick="animal('Rabbit','முயல்','🐰','Hop hop!')">🐰 Rabbit - முயல்</button>
+        <button class="answer" onclick="animal('Monkey','குரங்கு','🐵','Ooh ooh!')">🐵 Monkey - குரங்கு</button>
+        <button class="answer" onclick="animal('Tiger','புலி','🐯','Growl!')">🐯 Tiger - புலி</button>
+        <button class="answer" onclick="animal('Bird','பறவை','🐦','Tweet tweet!')">🐦 Bird - பறவை</button>
+      </div>
+      <div id="animalReply"></div>
+    `],
+
+    stories: ['📖 Story Time / கதை நேரம்', `
+      <div class="lesson-card">
+        <div class="big">🐘 🐦 🌳</div>
+        <h3>The Kind Little Elephant</h3>
+        <p>One day, a little elephant saw a bird whose nest had fallen. The elephant helped the bird build its nest again. They became good friends.</p>
+        <p><b>அன்பான குட்டி யானை</b></p>
+        <p>ஒரு நாள் ஒரு குட்டி யானை, கூடு கீழே விழுந்த பறவையைப் பார்த்தது. யானை பறவைக்கு கூடு கட்ட உதவியது. இருவரும் நல்ல நண்பர்களானார்கள்.</p>
+        <button class="btn" onclick="say('One day, a little elephant helped a bird. They became friends.','en-IN')">🔊 English</button>
+        <button class="btn secondary" onclick="say('ஒரு நாள் குட்டி யானை பறவைக்கு உதவியது. இருவரும் நண்பர்களானார்கள்.','ta-IN')">🔊 தமிழ்</button>
+      </div>
+      <div class="lesson-card">
+        <div class="big">🐜 🍬 🐦</div>
+        <h3>The Helpful Ant / உதவும் எறும்பு</h3>
+        <p>A little ant found food and shared it with its friends. Everyone was happy.</p>
+        <p>ஒரு சிறிய எறும்பு உணவைக் கண்டது. அதைத் தன் நண்பர்களுடன் பகிர்ந்து கொண்டது. எல்லோரும் மகிழ்ந்தனர்.</p>
+        <button class="btn" onclick="say('A little ant shared food with its friends.','en-IN')">🔊 English</button>
+        <button class="btn secondary" onclick="say('ஒரு சிறிய எறும்பு உணவை நண்பர்களுடன் பகிர்ந்து கொண்டது.','ta-IN')">🔊 தமிழ்</button>
+      </div>
+      <button class="btn" onclick="earnStar()">⭐ I enjoyed the story!</button>
+    `],
+
+    games: ['🧩 Play & Think', `
+      <p>Which one is a fruit? / பழம் எது?</p>
+      <div class="answers">
+        <button class="answer" onclick="gameAnswer(this,false)">🚗 Car</button>
+        <button class="answer" onclick="gameAnswer(this,true)">🍌 Banana</button>
+        <button class="answer" onclick="gameAnswer(this,false)">🐘 Elephant</button>
+      </div>
+      <div id="gameReply"></div>
+      <hr>
+      <p>How many stars? / எத்தனை நட்சத்திரங்கள்?</p>
+      <div class="answers">
+        <button class="answer" onclick="countAnswer(this,2)">⭐ ⭐</button>
+        <button class="answer" onclick="countAnswer(this,3)">⭐ ⭐ ⭐</button>
+        <button class="answer" onclick="countAnswer(this,4)">⭐ ⭐ ⭐ ⭐</button>
+      </div>
+      <div id="countReply"></div>
+    `],
+
+    rhymes: ['🎵 Rhymes / பாடல்கள்', `
+      <div class="lesson-card">
+        <h3>Little Star</h3>
+        <p>Little star, little star,<br>Shining brightly from afar.<br>Smile and learn every day,<br>Grow and shine along the way!</p>
+        <button class="btn" onclick="say('Little star, little star. Shining brightly from afar. Smile and learn every day. Grow and shine along the way!','en-IN')">🔊 Listen</button>
+      </div>
+      <div class="lesson-card">
+        <h3>குட்டி நட்சத்திரம்</h3>
+        <p>குட்டி குட்டி நட்சத்திரம்,<br>வானில் மின்னும் பொன் நட்சத்திரம்.<br>சிரித்து மகிழ்ந்து கற்போமே,<br>ஒன்றாக வளர்ந்து செல்வோமே!</p>
+        <button class="btn" onclick="say('குட்டி குட்டி நட்சத்திரம், வானில் மின்னும் பொன் நட்சத்திரம். சிரித்து மகிழ்ந்து கற்போமே, ஒன்றாக வளர்ந்து செல்வோமே!','ta-IN')">🔊 தமிழில் கேள்</button>
+      </div>
+      <p class="note">These are original short learning rhymes for Aadhi AI.</p>
+    `],
+
+    feelings: ['💗 My Feelings / என் உணர்வுகள்', `
+      <p>How are you feeling today? / இன்று உங்களுக்கு எப்படி இருக்கிறது?</p>
+      <div class="feelings">
+        <button class="feeling" onclick="chooseFeeling(this,'Happy','மகிழ்ச்சி')"><span class="face">😊</span>Happy</button>
+        <button class="feeling" onclick="chooseFeeling(this,'Sad','சோகம்')"><span class="face">😢</span>Sad</button>
+        <button class="feeling" onclick="chooseFeeling(this,'Angry','கோபம்')"><span class="face">😠</span>Angry</button>
+        <button class="feeling" onclick="chooseFeeling(this,'Worried','கவலை')"><span class="face">😟</span>Worried</button>
+        <button class="feeling" onclick="chooseFeeling(this,'Calm','அமைதி')"><span class="face">😌</span>Calm</button>
+        <button class="feeling" onclick="chooseFeeling(this,'Excited','உற்சாகம்')"><span class="face">🤩</span>Excited</button>
+      </div>
+      <div id="feelingReply"></div>
+    `],
+
+    buddy: ['🤖 Aadhi Buddy', `
+      <div class="chatline">Vanakkam! வணக்கம்! I am Aadhi, your friendly learning buddy.</div>
+      <div class="answers">
+        <button class="answer" onclick="buddy('feel')">What if I feel angry?</button>
+        <button class="answer" onclick="buddy('friend')">How can I help a friend?</button>
+        <button class="answer" onclick="buddy('count')">Let's count!</button>
+        <button class="answer" onclick="buddy('word')">Teach me a Tamil word</button>
+      </div>
+      <div id="buddyReply"></div>
+      <p class="note">Aadhi Buddy uses pre-written child-friendly conversations in this offline version. It is not a live AI chat.</p>
+    `],
+
+    kindness: ['🤝 Kindness Club', `
+      <p>Your friend dropped their crayons. What will you do?</p>
+      <div class="big">🖍️ 🖍️ 🖍️</div>
+      <div class="answers">
+        <button class="answer" onclick="kindness(this,true)">Help pick them up / உதவுவேன்</button>
+        <button class="answer" onclick="kindness(this,false)">Walk away / போய்விடுவேன்</button>
+      </div>
+      <div id="kindReply"></div>
+    `]
+  };
+
+  if (pages[id]) show(pages[id][0],pages[id][1]);
+}
+
+/* ALPHABET LESSON NAVIGATION */
+
+function startAlphabet(type) {
+  currentItems = type === 'vowels' ? vowels :
+                 type === 'consonants' ? consonants : english;
+  currentIndex = 0;
+  currentLanguage = type === 'english' ? 'en-IN' : 'ta-IN';
+  renderAlphabet();
+}
+
+function renderAlphabet() {
+  const item = currentItems[currentIndex];
+  $('lessonArea').innerHTML = `
+    <div class="lesson-card">
+      <div class="lesson-count">Lesson ${currentIndex+1} of ${currentItems.length}</div>
+      <div class="lesson-letter">${item[0]}</div>
+      <div class="lesson-word">${item[1]}</div>
+      <p>${item[2]}</p>
+      <button class="btn" onclick="speakAlphabet()">🔊 Listen</button>
+      <div class="lesson-actions">
+        <button class="btn secondary" onclick="alphabetMove(-1)">⬅ Previous</button>
+        <button class="btn" onclick="alphabetMove(1)">Next ➡</button>
+      </div>
+    </div>
+  `;
+}
+
+function speakAlphabet() {
+  const item = currentItems[currentIndex];
+  say(item[2],currentLanguage);
+}
+
+function alphabetMove(step) {
+  currentIndex = (currentIndex + step + currentItems.length) % currentItems.length;
+  renderAlphabet();
+  if (currentIndex === 0) earnStar();
+}
+
+/* NUMBER LESSON */
+
+let numberIndex = 1;
+
+function numberMove(step) {
+  numberIndex = Math.max(1,Math.min(100,numberIndex+step));
+  renderNumber();
+}
+
+function renderNumber() {
+  const words = {
+    1:'One',2:'Two',3:'Three',4:'Four',5:'Five',
+    6:'Six',7:'Seven',8:'Eight',9:'Nine',10:'Ten'
+  };
+  $('numberArea').innerHTML = `
+    <div class="lesson-card">
+      <div class="lesson-letter">${numberIndex}</div>
+      <div class="lesson-word">${words[numberIndex] || 'Number '+numberIndex}</div>
+      <p>${numberIndex} ${numberIndex===1?'star':'stars'}</p>
+      <div style="font-size:25px;word-break:break-word">
+        ${numberIndex <= 30 ? '⭐'.repeat(numberIndex) : '⭐'}
+      </div>
+    </div>
+  `;
+}
+
+function sayNumber() {
+  say(String(numberIndex), 'en-IN');
+}
+
+function openPageNumbers() {
+  numberIndex = 1;
+  openPage('numbers');
+  renderNumber();
+}
+
+const originalOpenPage = openPage;
+openPage = function(id) {
+  originalOpenPage(id);
+  if (id === 'numbers') {
+    numberIndex = 1;
+    renderNumber();
+  }
+};
+
+/* ANIMALS */
+
+function animal(en,ta,emoji,sound) {
+  $('animalReply').innerHTML = `
+    <div class="lesson-card">
+      <div class="big">${emoji}</div>
+      <h3>${en} - ${ta}</h3>
+      <p>${sound}</p>
+      <button class="btn" onclick="say('${en}','en-IN')">🔊 English</button>
+      <button class="btn secondary" onclick="say('${ta}','ta-IN')">🔊 தமிழ்</button>
+    </div>
+  `;
+}
+
+/* GAMES */
+
+function gameAnswer(el,correct) {
+  if (correct) {
+    el.classList.add('good');
+    $('gameReply').textContent = 'Well done! Banana is a fruit. நன்று!';
+    earnStar();
+  } else {
+    $('gameReply').textContent = 'Try again! மீண்டும் முயற்சி செய்!';
+  }
+}
+
+function countAnswer(el,n) {
+  if (n === 3) {
+    el.classList.add('good');
+    $('countReply').textContent = 'Correct! Three stars! நன்று!';
+    earnStar();
+  } else {
+    $('countReply').textContent = 'Try counting again!';
+  }
+}
+
+/* FEELINGS */
+
+function chooseFeeling(el,en,ta) {
+  document.querySelectorAll('.feeling').forEach(x=>x.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const responses = {
+    Happy:'That is lovely! What made you smile today?',
+    Sad:'It is okay to feel sad. A hug or talking to a trusted grown-up may help.',
+    Angry:'It is okay to feel angry. Let us pause and take three gentle breaths.',
+    Worried:'You are not alone. Tell a trusted grown-up what is worrying you.',
+    Calm:'Lovely. Notice your slow breathing and relaxed body.',
+    Excited:'Wonderful! What are you excited to do?'
+  };
+
+  $('feelingReply').innerHTML = `
+    <div class="chatline"><b>${en} / ${ta}</b><br>${responses[en]}</div>
+    <div class="breath">Breathe<br>மூச்சு</div>
+    <p>Let's take three gentle breaths together.</p>
+    <button class="btn" onclick="earnStar();this.textContent='⭐ Great job!'">I checked in / முடிந்தது</button>
+  `;
+}
+
+/* BUDDY */
+
+function buddy(type) {
+  const messages = {
+    feel:'When you feel angry, stop, take three slow breaths and talk to a trusted grown-up.',
+    friend:'Listen, share your toys, use kind words and help your friends.',
+    count:'One, two, three! ஒன்று, இரண்டு, மூன்று! ⭐',
+    word:'Vanakkam means Hello! வணக்கம்!'
+  };
+  $('buddyReply').innerHTML = '<div class="chatline">'+messages[type]+'</div>';
+}
+
+/* KINDNESS */
+
+function kindness(el,good) {
+  if (good) {
+    el.classList.add('good');
+    $('kindReply').innerHTML = '<div class="chatline">Wonderful! Helping is kind. அருமை!</div>';
+    earnStar();
+  } else {
+    $('kindReply').innerHTML = '<div class="chatline">Let us think about how our friend feels. We can help!</div>';
+  }
+}
+
+/* PARENT SECTION */
+
+function parentGate() {
+  const answer = prompt('Grown-up check: What is 6 + 2?');
+  if (answer === '8') {
+    $('parents').classList.add('show');
+    $('parentStars').textContent = stars;
+    $('parents').scrollIntoView({behavior:'smooth'});
+  } else {
+    alert('Please ask a grown-up to help.');
+  }
+}
+
+/* OFFLINE SERVICE WORKER */
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
