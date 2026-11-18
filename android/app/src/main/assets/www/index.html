@@ -491,6 +491,7 @@ function startAlphabet(type) {
   renderAlphabet();
 }
 
+
 function renderAlphabet() {
   const item = currentItems[currentIndex];
   $('lessonArea').innerHTML = `
@@ -500,12 +501,22 @@ function renderAlphabet() {
       <div class="lesson-word">${item[1]}</div>
       <p>${item[2]}</p>
       <button class="btn" onclick="speakAlphabet()">🔊 Listen</button>
+      <button class="btn secondary" onclick="stopAadhiVoice()">⏹ Stop</button>
       <div class="lesson-actions">
         <button class="btn secondary" onclick="alphabetMove(-1)">⬅ Previous</button>
         <button class="btn" onclick="alphabetMove(1)">Next ➡</button>
       </div>
     </div>
   `;
+  setTimeout(() => speakAlphabet(), 400);
+}
+
+function stopAadhiVoice() {
+  if (window.AadhiVoice) {
+    window.AadhiVoice.stop();
+  } else if ('speechSynthesis' in window) {
+    speechSynthesis.cancel();
+  }
 }
 
 function speakAlphabet() {
