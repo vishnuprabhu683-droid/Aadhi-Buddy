@@ -419,3 +419,151 @@
 
   home();
 })();
+
+/* Aadhi AI - Voice Conversation */
+
+(function () {
+  if (window.__aadhiVoiceChatAdded) return;
+  window.__aadhiVoiceChatAdded = true;
+
+  function addVoiceChat() {
+    if (document.getElementById("aadhiVoiceChat")) return;
+
+    const panel = document.createElement("div");
+    panel.id = "aadhiVoiceChat";
+
+    panel.style.cssText = `
+      position:fixed;
+      bottom:85px;
+      right:15px;
+      z-index:99999;
+      background:#fff;
+      padding:14px;
+      border-radius:18px;
+      box-shadow:0 3px 15px #0003;
+      width:260px;
+      font-family:Arial,sans-serif;
+      display:none;
+      color:#342f48;
+    `;
+
+    panel.innerHTML = `
+      <b style="font-size:17px;">🎤 Talk to Aadhi</b>
+
+      <p style="font-size:13px;">
+        Choose a language and tap the microphone.
+      </p>
+
+      <select id="aadhiVoiceLanguage"
+        style="width:100%;padding:9px;border-radius:9px;">
+        <option value="en-IN">English</option>
+        <option value="ta-IN">தமிழ்</option>
+      </select>
+
+      <button id="aadhiMicButton"
+        style="width:100%;padding:12px;margin-top:10px;
+        border:0;border-radius:12px;background:#7c4dff;
+        color:white;font-size:16px;">
+        🎤 Speak
+      </button>
+
+      <p id="aadhiVoiceStatus"
+        style="font-size:13px;margin-top:10px;">
+        Ready to listen!
+      </p>
+
+      <p id="aadhiVoiceHeard"
+        style="font-size:14px;word-wrap:break-word;"></p>
+
+      <button id="aadhiVoiceClose"
+        style="padding:8px 14px;border:0;border-radius:8px;">
+        Close
+      </button>
+    `;
+
+    document.body.appendChild(panel);
+
+    const openButton = document.createElement("button");
+    openButton.id = "aadhiVoiceOpen";
+    openButton.innerHTML = "🎤 Talk to Aadhi";
+    openButton.style.cssText = `
+      position:fixed;
+      bottom:20px;
+      right:15px;
+      z-index:99998;
+      border:0;
+      border-radius:25px;
+      padding:13px 18px;
+      background:#7c4dff;
+      color:white;
+      font-weight:bold;
+      box-shadow:0 3px 12px #0003;
+    `;
+
+    document.body.appendChild(openButton);
+
+    openButton.onclick = () => {
+      panel.style.display = "block";
+    };
+
+    document.getElementById("aadhiVoiceClose").onclick = () => {
+      panel.style.display = "none";
+      if (window.AadhiVoice) {
+        AadhiVoice.cancelListen();
+      }
+    };
+
+    document.getElementById("aadhiMicButton").onclick = () => {
+      const language =
+        document.getElementById("aadhiVoiceLanguage").value;
+
+      document.getElementById("aadhiVoiceStatus").textContent =
+        "Listening...";
+
+      document.getElementById("aadhiVoiceHeard").textContent = "";
+
+      if (window.AadhiVoice) {
+        AadhiVoice.listen(language);
+      } else {
+        document.getElementById("aadhiVoiceStatus").textContent =
+          "Voice service unavailable.";
+      }
+    };
+  }
+
+  window.onAadhiSpeechStatus = function (message) {
+    const status = document.getElementById("aadhiVoiceStatus");
+    if (status) status.textContent = message;
+  };
+
+  window.onAadhiSpeechError = function (message) {
+    const status = document.getElementById("aadhiVoiceStatus");
+    if (status) status.textContent = message;
+  };
+
+  window.onAadhiSpeechResult = function (message) {
+    const language =
+      document.getElementById("aadhiVoiceLanguage").value;
+
+    const heard = document.getElementById("aadhiVoiceHeard");
+    const status = document.getElementById("aadhiVoiceStatus");
+
+    if (heard) heard.textContent = "You said: " + message;
+
+    if (status) status.textContent = "Aadhi heard you!";
+
+    if (window.AadhiVoice) {
+      const reply = language === "ta-IN"
+        ? "நீங்கள் சொன்னது எனக்குப் புரிந்தது. அருமை!"
+        : "I heard you! Well done. What would you like to learn today?";
+
+      AadhiVoice.speak(reply, language);
+    }
+  };
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", addVoiceChat);
+  } else {
+    addVoiceChat();
+  }
+})();
