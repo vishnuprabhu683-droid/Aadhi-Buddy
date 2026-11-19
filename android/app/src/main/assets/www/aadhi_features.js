@@ -1,111 +1,135 @@
 
-/* Aadhi AI - 10 Feature Add-on */
+/* Aadhi AI - Complete 10 Feature Add-on + Voice Conversation
+   Uses the existing Android AadhiVoice bridge.
+*/
 (function () {
   'use strict';
 
-  if (window.__aadhi10Loaded) return;
-  window.__aadhi10Loaded = true;
+  if (window.__aadhiCompleteLoaded) return;
+  window.__aadhiCompleteLoaded = true;
 
-  const KEY = 'aadhi10_progress_v2';
-  let progress = {};
-  try {
-    progress = JSON.parse(localStorage.getItem(KEY) || '{}');
-  } catch (e) {
-    progress = {};
+  const STORAGE_KEY = 'aadhi_complete_progress_v1';
+  const progress = loadProgress();
+
+  function loadProgress() {
+    try {
+      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+      return {
+        stars: Number(saved.stars) || 0,
+        games: Number(saved.games) || 0,
+        routine: saved.routine && typeof saved.routine === 'object' ? saved.routine : {},
+        badges: Array.isArray(saved.badges) ? saved.badges : []
+      };
+    } catch (_) {
+      return { stars: 0, games: 0, routine: {}, badges: [] };
+    }
   }
 
-  progress.stars = progress.stars || 0;
-  progress.games = progress.games || 0;
-  progress.routine = progress.routine || {};
-  progress.badges = progress.badges || [];
-
-  function save() {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(progress));
-    } catch (e) {}
+  function saveProgress() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(progress)); } catch (_) {}
   }
 
-  function speak(message, lang) {
+  function speak(message, language) {
     try {
-      if (window.AadhiVoice &&
-          typeof window.AadhiVoice.speak === 'function') {
-        window.AadhiVoice.speak(message, lang || 'en');
+      if (window.AadhiVoice && typeof window.AadhiVoice.speak === 'function') {
+        window.AadhiVoice.speak(String(message), language || 'en');
         return;
       }
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const speech = new SpeechSynthesisUtterance(message);
-        speech.lang = lang === 'ta' ? 'ta-IN' : 'en-IN';
-        window.speechSynthesis.speak(speech);
+        const utterance = new SpeechSynthesisUtterance(String(message));
+        utterance.lang = language === 'ta' ? 'ta-IN' : 'en-IN';
+        window.speechSynthesis.speak(utterance);
       }
-    } catch (e) {}
+    } catch (error) {
+      console.log('Aadhi speech unavailable:', error);
+    }
+  }
+
+  function escapeHTML(value) {
+    return String(value).replace(/[&<>"']/g, ch => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[ch]));
   }
 
   const style = document.createElement('style');
   style.textContent = `
     #aadhi10-launch {
-      position:fixed; right:14px; bottom:18px; z-index:99998;
-      border:0; border-radius:30px; padding:13px 18px;
-      background:#7139bd; color:white; font-size:16px;
-      font-weight:bold; box-shadow:0 4px 14px #0004;
+      position:fixed; right:14px; bottom:82px; z-index:99990;
+      border:0; border-radius:28px; padding:13px 18px;
+      background:#6c4bd8; color:#fff; font-size:15px; font-weight:700;
+      box-shadow:0 4px 14px #0003;
     }
     #aadhi10-overlay {
-      display:none; position:fixed; inset:0; z-index:99999;
-      background:#fff8e9; color:#302746; overflow:auto;
+      display:none; position:fixed; inset:0; z-index:99991;
+      background:#fff8e9; color:#302b43; overflow:auto;
       font-family:Arial,sans-serif;
     }
-    #aadhi10-overlay * {box-sizing:border-box}
     #aadhi10-header {
-      position:sticky; top:0; z-index:2; background:#7139bd;
-      color:white; padding:14px; display:flex;
-      justify-content:space-between; align-items:center;
+      position:sticky; top:0; z-index:2; display:flex;
+      align-items:center; justify-content:space-between; gap:8px;
+      padding:14px; background:#6c4bd8; color:white;
     }
-    #aadhi10-header button {
-      border:0; border-radius:10px; padding:8px 13px;
-      background:white; color:#7139bd; font-weight:bold;
+    #aadhi10-header strong { font-size:17px; }
+    #aadhi10-header button, .a10-back {
+      border:0; border-radius:9px; padding:9px 12px;
+      background:#fff; color:#40326f; font-weight:700;
     }
-    #aadhi10-content {padding:14px; max-width:650px; margin:auto}
-    .a10-grid {
-      display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
-      gap:10px;
+    #aadhi10-content { padding:16px; max-width:760px; margin:auto; }
+    .a10-welcome { text-align:center; padding:12px 4px 18px; }
+    .a10-welcome h2 { margin:5px 0; color:#5538b5; }
+    .a10-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+    .a10-tile {
+      min-height:104px; border:2px solid #eee4ff; border-radius:17px;
+      background:white; padding:13px 8px; font-size:15px;
+      font-weight:700; color:#352d50; box-shadow:0 2px 7px #0000000c;
     }
-    .a10-card {
-      border:0; border-radius:16px; padding:17px 8px;
-      min-height:100px; background:white; color:#302746;
-      box-shadow:0 2px 8px #0001; font-size:16px;
-    }
-    .a10-card span {display:block;font-size:28px;margin-bottom:7px}
+    .a10-tile span { display:block; font-size:30px; margin-bottom:7px; }
     .a10-panel {
-      background:white; padding:16px; border-radius:16px;
-      box-shadow:0 2px 8px #0001;
+      background:white; border-radius:17px; padding:16px;
+      box-shadow:0 2px 10px #00000012;
     }
-    .a10-btn {
-      border:0; border-radius:12px; padding:11px 15px;
-      margin:5px 3px; background:#7139bd; color:white;
-      font-size:15px;
+    .a10-panel h2 { color:#5538b5; margin-top:0; }
+    .a10-panel button, .a10-action {
+      border:0; border-radius:11px; padding:11px 14px; margin:5px 4px 5px 0;
+      background:#eee8ff; color:#3d2c78; font-weight:700; font-size:15px;
     }
-    .a10-option {
-      display:block; width:100%; margin:9px 0; padding:13px;
-      border:2px solid #e5dafa; border-radius:12px;
-      background:#fff; color:#302746; font-size:17px;
+    .a10-choice { display:inline-block; min-width:54px; margin:6px; padding:14px;
+      border:2px solid #ddd; border-radius:12px; background:#fff; font-size:23px; }
+    .a10-good { background:#dff6df!important; border-color:#43a047!important; }
+    .a10-muted { color:#625d70; line-height:1.5; }
+    .a10-row { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .a10-routine label { display:block; padding:10px; margin:7px 0;
+      background:#f7f3ff; border-radius:10px; }
+    #aadhiVoiceOpen {
+      position:fixed; right:14px; bottom:18px; z-index:99992;
+      border:0; border-radius:28px; padding:13px 17px;
+      background:#e65b35; color:white; font-size:15px; font-weight:700;
+      box-shadow:0 4px 14px #0003;
     }
-    .a10-big {font-size:25px; font-weight:bold; margin:12px 0}
-    .a10-muted {color:#756b82;font-size:14px}
-    #a10-canvas {
-      width:100%; height:260px; border:2px dashed #b9a4d8;
-      border-radius:12px; background:white; touch-action:none;
+    #aadhiVoiceChat {
+      display:none; position:fixed; z-index:99999; left:12px; right:12px;
+      bottom:76px; max-width:520px; margin:auto; padding:16px;
+      border-radius:18px; background:#fff; color:#302b43;
+      box-shadow:0 5px 25px #0005; font-family:Arial,sans-serif;
     }
-    .a10-check {display:block;padding:10px;background:#fff8e9;
-      margin:8px 0;border-radius:10px}
+    #aadhiVoiceChat h3 { margin:0 0 10px; color:#5538b5; }
+    #aadhiVoiceChat select, #aadhiVoiceChat button {
+      padding:10px; border-radius:9px; border:1px solid #ddd; margin:4px;
+    }
+    #aadhiMicButton { background:#e65b35; color:white; border:0!important; font-weight:bold; }
+    #aadhiVoiceStatus { color:#625d70; font-size:13px; }
+    #aadhiVoiceHeard { min-height:24px; overflow-wrap:anywhere; }
     @media(max-width:360px) {
-      .a10-grid {gap:7px}
-      .a10-card {font-size:14px;padding:12px 5px}
+      .a10-grid { gap:8px; }
+      .a10-tile { font-size:13px; }
     }
   `;
   document.head.appendChild(style);
 
   const launch = document.createElement('button');
   launch.id = 'aadhi10-launch';
+  launch.type = 'button';
   launch.textContent = '✨ Aadhi AI';
   document.body.appendChild(launch);
 
@@ -114,84 +138,102 @@
   overlay.innerHTML = `
     <div id="aadhi10-header">
       <strong>✨ Aadhi AI - Learn & Play</strong>
-      <button id="a10-close">✕ Close</button>
+      <button id="a10-close" type="button">✕ Close</button>
     </div>
     <main id="aadhi10-content"></main>
   `;
   document.body.appendChild(overlay);
 
   const content = overlay.querySelector('#aadhi10-content');
-
-  const features = [
-    ['💬','Talk to Aadhi'],
-    ['🗣️','Voice Practice'],
-    ['🧩','Puzzle Games'],
-    ['🎨','Drawing & Colouring'],
-    ['👨‍👩‍👧','Parent Dashboard'],
-    ['🔬','Little Scientist'],
-    ['📅','Daily Routine'],
-    ['🛡️','Safety School'],
-    ['🏅','Reward Badges'],
-    ['📖','Stories & Rhymes']
+  const featureNames = [
+    ['💬', 'Talk to Aadhi'],
+    ['🎤', 'Voice Practice'],
+    ['🧩', 'Puzzle Games'],
+    ['🎨', 'Drawing & Colouring'],
+    ['👨‍👩‍👧', 'Parent Dashboard'],
+    ['🔬', 'Little Scientist'],
+    ['📅', 'Daily Routine'],
+    ['🛡️', 'Safety School'],
+    ['🏆', 'Reward Badges'],
+    ['📖', 'Stories & Rhymes']
   ];
 
   function home() {
     content.innerHTML = `
-      <h2>Welcome, Little Star! 🌟</h2>
-      <p>Learn something new and have fun every day.</p>
+      <section class="a10-welcome">
+        <h2>Hello, little learner! 🌈</h2>
+        <p>Learn, play, speak and grow with Aadhi.</p>
+        <p>⭐ ${progress.stars} stars &nbsp; 🎮 ${progress.games} games played</p>
+      </section>
       <div class="a10-grid">
-        ${features.map((f, i) =>
-          `<button class="a10-card" data-feature="${i}">
-            <span>${f[0]}</span>${f[1]}
-          </button>`
-        ).join('')}
+        ${featureNames.map((item, i) => `
+          <button class="a10-tile" type="button" data-feature="${i}">
+            <span>${item[0]}</span>${item[1]}
+          </button>`).join('')}
       </div>
-      <p class="a10-muted" style="text-align:center;margin-top:18px">
-        ⭐ Your stars: ${progress.stars}
-      </p>
     `;
+    content.querySelectorAll('[data-feature]').forEach(button => {
+      button.addEventListener('click', () => openFeature(Number(button.dataset.feature)));
+    });
   }
 
   function panel(title, html) {
     content.innerHTML = `
-      <button class="a10-btn" id="a10-back">← Home</button>
-      <h2>${title}</h2>
-      <section class="a10-panel">${html}</section>
-    `;
+      <section class="a10-panel">
+        <button class="a10-back" id="a10-back" type="button">← Back</button>
+        <h2>${title}</h2>
+        ${html}
+      </section>`;
+    content.querySelector('#a10-back').addEventListener('click', home);
   }
 
   function earnStar() {
-    progress.stars++;
-    if (progress.stars >= 5 && !progress.badges.includes('Star Collector')) {
-      progress.badges.push('Star Collector');
+    progress.stars += 1;
+    if (progress.stars >= 5 && !progress.badges.includes('Super Star')) {
+      progress.badges.push('Super Star');
     }
-    save();
+    saveProgress();
   }
 
   function openFeature(index) {
     switch (index) {
       case 0:
         panel('💬 Talk to Aadhi', `
-          <p>Hello, my little friend! What would you like to talk about?</p>
-          <button class="a10-btn" data-say="Hello! I am happy to learn with you." data-lang="en">English greeting 🔊</button>
-          <button class="a10-btn" data-say="வணக்கம்! உன்னுடன் கற்க எனக்கு மகிழ்ச்சி." data-lang="ta">தமிழ் வணக்கம் 🔊</button>
-          <p>Choose a feeling:</p>
-          <button class="a10-btn" data-say="I am happy today!" data-lang="en">😊 Happy</button>
-          <button class="a10-btn" data-say="It is okay to feel sad. Talk to someone you trust." data-lang="en">😢 Sad</button>
-          <button class="a10-btn" data-say="Take a slow breath. You can calm down." data-lang="en">😠 Angry</button>
+          <p>Choose a question and talk with Aadhi!</p>
+          <button data-talk="What is your name?">What is your name?</button>
+          <button data-talk="Tell me a fun fact.">Tell me a fun fact.</button>
+          <button data-talk="Teach me a new word.">Teach me a new word.</button>
+          <button data-talk="வணக்கம்! எப்படி இருக்கிறாய்?">வணக்கம்!</button>
+          <p id="a10-talk-reply" class="a10-muted">I am ready to learn with you!</p>
         `);
+        content.querySelectorAll('[data-talk]').forEach(button => {
+          button.addEventListener('click', () => {
+            const q = button.dataset.talk;
+            const reply = q.includes('வணக்கம்') ? 'வணக்கம்! நான் நன்றாக இருக்கிறேன். நீ எப்படி இருக்கிறாய்?' :
+              q.includes('name') ? 'I am Aadhi, your learning friend!' :
+              q.includes('fact') ? 'A butterfly tastes with its feet!' :
+              'Today’s word is curious. Curious means wanting to learn!';
+            content.querySelector('#a10-talk-reply').textContent = reply;
+            speak(reply, q.includes('வணக்கம்') ? 'ta' : 'en');
+          });
+        });
         break;
 
       case 1:
-        panel('🗣️ Voice Practice', `
+        panel('🎤 Voice Practice', `
           <p>Practise saying these words aloud.</p>
-          <button class="a10-option" data-say="Apple" data-lang="en">🍎 Apple 🔊</button>
-          <button class="a10-option" data-say="Ball" data-lang="en">⚽ Ball 🔊</button>
-          <button class="a10-option" data-say="Cat" data-lang="en">🐱 Cat 🔊</button>
-          <button class="a10-option" data-say="அம்மா" data-lang="ta">அம்மா 🔊</button>
-          <button class="a10-option" data-say="அப்பா" data-lang="ta">அப்பா 🔊</button>
-          <p class="a10-muted">Listen and repeat with a grown-up.</p>
+          <div class="a10-row">
+            ${['Apple 🍎', 'Ball ⚽', 'Cat 🐱', 'நிலா 🌙', 'அம்மா ❤️'].map(word =>
+              `<button data-word="${escapeHTML(word)}">${escapeHTML(word)}</button>`).join('')}
+          </div>
+          <p class="a10-muted">Tap a word to hear Aadhi say it.</p>
         `);
+        content.querySelectorAll('[data-word]').forEach(button => {
+          button.addEventListener('click', () => {
+            const word = button.dataset.word;
+            speak(word, /[அ-ஹ]/.test(word) ? 'ta' : 'en');
+          });
+        });
         break;
 
       case 2:
@@ -199,39 +241,38 @@
         break;
 
       case 3:
-        panel('🎨 Drawing & Colouring', `
-          <p>Draw anything you like!</p>
-          <input type="color" id="a10-color" value="#e53935"
-            aria-label="Choose drawing colour">
-          <button class="a10-btn" id="a10-clear">Clear drawing</button>
-          <canvas id="a10-canvas" width="600" height="360"></canvas>
-          <p class="a10-muted">Use your finger to draw.</p>
-        `);
         drawing();
         break;
 
       case 4:
         panel('👨‍👩‍👧 Parent Dashboard', `
-          <h3>Learning progress</h3>
-          <p>⭐ Stars earned: <strong>${progress.stars}</strong></p>
-          <p>🎮 Games played: <strong>${progress.games}</strong></p>
-          <p>🏅 Badges earned: <strong>${progress.badges.length}</strong></p>
-          <p class="a10-muted">This dashboard shows progress saved on this device.</p>
-          <button class="a10-btn" id="a10-parent-speak">Read progress aloud</button>
+          <p>Learning progress at a glance.</p>
+          <h3>⭐ Stars earned: ${progress.stars}</h3>
+          <h3>🎮 Games played: ${progress.games}</h3>
+          <h3>🏅 Badges: ${progress.badges.length ? progress.badges.map(escapeHTML).join(', ') : 'Keep learning to earn badges!'}</h3>
+          <p class="a10-muted">Progress is saved on this device.</p>
         `);
         break;
 
       case 5:
         panel('🔬 Little Scientist', `
-          <h3>Why does ice melt?</h3>
-          <p>Ice melts when it gets warm. It changes from solid ice into liquid water.</p>
-          <button class="a10-btn" data-say="Ice melts when it gets warm and becomes water." data-lang="en">Listen 🔊</button>
-          <hr>
-          <h3>Day and Night</h3>
-          <p>The Earth spins. The side facing the Sun has daytime. The other side has night.</p>
-          <button class="a10-btn" data-say="The Earth spins. We have day when our side faces the Sun." data-lang="en">Listen 🔊</button>
-          <p class="a10-muted">Try these activities with a grown-up.</p>
+          <p><b>Did you know?</b></p>
+          <p id="a10-science-fact">Plants need sunlight, water and air to grow. 🌱</p>
+          <button id="a10-next-fact">Another fun fact</button>
         `);
+        {
+          const facts = [
+            'The Earth moves around the Sun. 🌍',
+            'A rainbow has many beautiful colours. 🌈',
+            'The Moon reflects light from the Sun. 🌙',
+            'Some butterflies taste with their feet. 🦋',
+            'Water can be liquid, ice or vapour. 💧'
+          ];
+          let factIndex = 0;
+          content.querySelector('#a10-next-fact').addEventListener('click', () => {
+            content.querySelector('#a10-science-fact').textContent = facts[factIndex++ % facts.length];
+          });
+        }
         break;
 
       case 6:
@@ -240,330 +281,296 @@
 
       case 7:
         panel('🛡️ Safety School', `
-          <h3>Remember these safety rules</h3>
-          <p>🧑‍🤝‍🧑 Stay near a trusted grown-up.</p>
-          <p>🚦 Cross roads with an adult.</p>
-          <p>🔥 Never touch matches or hot objects.</p>
-          <p>🔒 Never share your address, password or phone number online.</p>
-          <p>🆘 If you feel unsafe, tell a trusted grown-up immediately.</p>
-          <button class="a10-btn" data-say="If you feel unsafe, tell a trusted grown-up immediately." data-lang="en">Listen 🔊</button>
+          <p><b>Remember these safety rules:</b></p>
+          <ul>
+            <li>Stay close to a trusted grown-up outside.</li>
+            <li>Never share your name, address or phone number with strangers online.</li>
+            <li>Do not touch fire, medicines or sharp objects.</li>
+            <li>If you feel unsafe, tell a trusted grown-up.</li>
+            <li>Never go anywhere with someone without your grown-up’s permission.</li>
+          </ul>
+          <p class="a10-muted">You can always ask a trusted grown-up for help.</p>
         `);
         break;
 
       case 8:
-        panel('🏅 Reward Badges', `
-          <p>Keep learning to earn stars and badges!</p>
-          <p>⭐ Total stars: ${progress.stars}</p>
-          <h3>Your badges</h3>
-          ${progress.badges.length
-            ? progress.badges.map(b => `<p>🏅 ${b}</p>`).join('')
-            : '<p>No badges yet. Play a game to get started!</p>'}
+        panel('🏆 Reward Badges', `
+          <h3>⭐ Stars: ${progress.stars}</h3>
+          <p>${progress.stars >= 1 ? '🌟 First Star earned!' : 'Earn your first star by playing a game.'}</p>
+          <p>${progress.stars >= 5 ? '🏅 Super Star badge earned!' : 'Earn 5 stars to unlock Super Star.'}</p>
+          <p><b>Your badges:</b> ${progress.badges.length ? progress.badges.map(escapeHTML).join(', ') : 'No badges yet'}</p>
         `);
         break;
 
       case 9:
-        panel('📖 Stories & Rhymes', `
-          <h3>🐢 The Kind Little Turtle</h3>
-          <p>One sunny day, a little turtle saw a thirsty bird. The turtle showed the bird a small pond. The bird drank water and smiled. They became good friends.</p>
-          <button class="a10-btn" data-say="One sunny day, a little turtle saw a thirsty bird. The turtle showed the bird a small pond. The bird drank water and smiled. They became good friends." data-lang="en">Read story aloud 🔊</button>
-          <hr>
-          <h3>🌟 Twinkle, Twinkle</h3>
-          <p>Twinkle, twinkle, little star. How I wonder what you are!</p>
-          <button class="a10-btn" data-say="Twinkle, twinkle, little star. How I wonder what you are!" data-lang="en">Say rhyme aloud 🔊</button>
-        `);
+        stories();
         break;
     }
   }
 
   function puzzle() {
     const questions = [
-      {q:'Which one is an animal?', a:['🪑 Chair','🐘 Elephant','✏️ Pencil'], correct:1},
-      {q:'How many sides does a triangle have?', a:['2','3','4'], correct:1},
-      {q:'Which colour is the Sun usually shown as?', a:['Yellow','Blue','Green'], correct:0},
-      {q:'What comes after 4?', a:['3','5','7'], correct:1}
+      { q: 'Which one is a fruit?', choices: ['🍎 Apple', '🚗 Car', '⚽ Ball'], answer: 0 },
+      { q: 'Which animal says meow?', choices: ['🐶 Dog', '🐱 Cat', '🐮 Cow'], answer: 1 },
+      { q: 'How many stars are here? ⭐ ⭐ ⭐', choices: ['2', '3', '4'], answer: 1 },
+      { q: 'Which is a colour?', choices: ['🔵 Blue', '🍞 Bread', '🐟 Fish'], answer: 0 }
     ];
-    const q = questions[Math.floor(Math.random() * questions.length)];
-    panel('🧩 Puzzle Game', `
-      <h3>${q.q}</h3>
-      ${q.a.map((a,i) =>
-        `<button class="a10-option" data-answer="${i}" data-correct="${q.correct}">${a}</button>`
-      ).join('')}
-      <p id="a10-game-result" aria-live="polite"></p>
+    let current = 0;
+    function render() {
+      const item = questions[current];
+      panel('🧩 Puzzle Games', `
+        <p>Question ${current + 1} of ${questions.length}</p>
+        <h3>${item.q}</h3>
+        <div>${item.choices.map((choice, i) =>
+          `<button class="a10-choice" data-answer="${i}">${choice}</button>`).join('')}</div>
+        <p id="a10-puzzle-result" aria-live="polite"></p>
+      `);
+      content.querySelectorAll('[data-answer]').forEach(button => {
+        button.addEventListener('click', () => {
+          const result = content.querySelector('#a10-puzzle-result');
+          if (Number(button.dataset.answer) === item.answer) {
+            result.textContent = 'Correct! Well done! ⭐';
+            button.classList.add('a10-good');
+            earnStar();
+            progress.games += 1;
+            saveProgress();
+            content.querySelectorAll('[data-answer]').forEach(b => b.disabled = true);
+            const next = document.createElement('button');
+            next.textContent = current === questions.length - 1 ? 'Finish' : 'Next question';
+            next.addEventListener('click', () => {
+              if (current < questions.length - 1) { current++; render(); }
+              else {
+                panel('🎉 Great work!', `<p>You finished the puzzle! ⭐</p><button id="a10-again">Play again</button>`);
+                content.querySelector('#a10-again').addEventListener('click', () => { current = 0; render(); });
+              }
+            });
+            content.querySelector('.a10-panel').appendChild(next);
+            speak('Correct! Well done!', 'en');
+          } else {
+            result.textContent = 'Try again! You can do it!';
+            speak('Try again. You can do it!', 'en');
+          }
+        });
+      });
+    }
+    render();
+  }
+
+  function drawing() {
+    panel('🎨 Drawing & Colouring', `
+      <p>Choose a colour and draw with your finger.</p>
+      <div class="a10-row">
+        ${['#e53935','#ff9800','#fdd835','#43a047','#1e88e5','#8e24aa','#222222','#ffffff'].map(col =>
+          `<button type="button" data-colour="${col}" aria-label="Choose ${col}" style="width:36px;height:36px;padding:0;background:${col};border:2px solid #aaa"></button>`).join('')}
+      </div>
+      <canvas id="a10-canvas" width="700" height="360" style="width:100%;height:260px;border:2px solid #ddd;border-radius:10px;touch-action:none;background:white"></canvas>
+      <p><button id="a10-clear">Clear drawing</button></p>
     `);
+    const canvas = content.querySelector('#a10-canvas');
+    const ctx = canvas.getContext('2d');
+    let colour = '#e53935';
+    let drawingNow = false;
+    let last = null;
+    function point(event) {
+      const rect = canvas.getBoundingClientRect();
+      return {
+        x: (event.clientX - rect.left) * canvas.width / rect.width,
+        y: (event.clientY - rect.top) * canvas.height / rect.height
+      };
+    }
+    canvas.addEventListener('pointerdown', event => {
+      drawingNow = true;
+      last = point(event);
+      canvas.setPointerCapture(event.pointerId);
+    });
+    canvas.addEventListener('pointermove', event => {
+      if (!drawingNow) return;
+      const p = point(event);
+      ctx.strokeStyle = colour;
+      ctx.lineWidth = 8;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(last.x, last.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.stroke();
+      last = p;
+    });
+    ['pointerup','pointercancel','lostpointercapture'].forEach(name =>
+      canvas.addEventListener(name, () => { drawingNow = false; last = null; }));
+    content.querySelectorAll('[data-colour]').forEach(button =>
+      button.addEventListener('click', () => { colour = button.dataset.colour; }));
+    content.querySelector('#a10-clear').addEventListener('click', () =>
+      ctx.clearRect(0, 0, canvas.width, canvas.height));
   }
 
   function routine() {
     const tasks = [
-      'Wake up and brush my teeth',
-      'Eat a healthy breakfast',
-      'Learn something new',
-      'Play and exercise',
-      'Read a story',
-      'Go to bed on time'
+      ['wake', 'Wake up and smile ☀️'],
+      ['brush', 'Brush my teeth 🪥'],
+      ['breakfast', 'Eat breakfast 🍎'],
+      ['learn', 'Learn something new 📚'],
+      ['play', 'Play and exercise ⚽'],
+      ['sleep', 'Get ready for bed 🌙']
     ];
     panel('📅 Daily Routine', `
-      <p>Tick the activities you have completed today.</p>
-      ${tasks.map((t,i) => `
-        <label class="a10-check">
-          <input type="checkbox" data-routine="${i}"
-            ${progress.routine[i] ? 'checked' : ''}> ${t}
-        </label>
-      `).join('')}
-      <p id="a10-routine-result"></p>
+      <p>Tick each activity when you finish it.</p>
+      <div class="a10-routine">
+        ${tasks.map(([id, label]) =>
+          `<label><input type="checkbox" data-routine="${id}" ${progress.routine[id] ? 'checked' : ''}> ${label}</label>`).join('')}
+      </div>
+      <p id="a10-routine-result">${tasks.filter(([id]) => progress.routine[id]).length} activities completed. Great job!</p>
     `);
+    content.querySelectorAll('[data-routine]').forEach(box => {
+      box.addEventListener('change', () => {
+        progress.routine[box.dataset.routine] = box.checked;
+        saveProgress();
+        const done = tasks.filter(([id]) => progress.routine[id]).length;
+        content.querySelector('#a10-routine-result').textContent =
+          done + ' of ' + tasks.length + ' activities completed. Great job!';
+        if (done === tasks.length) {
+          earnStar();
+          content.querySelector('#a10-routine-result').textContent += ' ⭐ You earned a star!';
+        }
+      });
+    });
   }
 
-  function drawing() {
-    const canvas = content.querySelector('#a10-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    let drawingNow = false;
-
-    function position(e) {
-      const r = canvas.getBoundingClientRect();
-      return {
-        x: (e.clientX - r.left) * canvas.width / r.width,
-        y: (e.clientY - r.top) * canvas.height / r.height
-      };
+  function stories() {
+    const items = [
+      {
+        title: 'The Kind Little Rabbit 🐰',
+        text: 'A little rabbit saw a thirsty bird. The rabbit found a small cup of water and shared it. The bird was happy. The rabbit learned that kindness makes everyone smile.'
+      },
+      {
+        title: 'The Bright Sun ☀️',
+        text: 'The Sun rose in the morning and warmed the garden. The flowers opened their petals. The bees began to buzz. It was a beautiful new day.'
+      },
+      {
+        title: 'குட்டி யானை 🐘',
+        text: 'ஒரு குட்டி யானை காட்டில் வாழ்ந்து வந்தது. அது தன் நண்பர்களுக்கு உதவி செய்தது. எல்லோரும் மகிழ்ச்சியாக இருந்தார்கள். உதவி செய்வது நல்ல பழக்கம்.'
+      }
+    ];
+    let index = 0;
+    function render() {
+      const story = items[index];
+      panel('📖 Stories & Rhymes', `
+        <h3>${story.title}</h3>
+        <p style="line-height:1.8">${story.text}</p>
+        <button id="a10-read-story">🔊 Read aloud</button>
+        <button id="a10-next-story">Next story</button>
+      `);
+      content.querySelector('#a10-read-story').addEventListener('click', () =>
+        speak(story.text, /[அ-ஹ]/.test(story.text) ? 'ta' : 'en'));
+      content.querySelector('#a10-next-story').addEventListener('click', () => {
+        index = (index + 1) % items.length;
+        render();
+      });
     }
-
-    canvas.addEventListener('pointerdown', e => {
-      drawingNow = true;
-      const p = position(e);
-      ctx.beginPath();
-      ctx.moveTo(p.x, p.y);
-      canvas.setPointerCapture(e.pointerId);
-    });
-
-    canvas.addEventListener('pointermove', e => {
-      if (!drawingNow) return;
-      const p = position(e);
-      ctx.strokeStyle = content.querySelector('#a10-color').value;
-      ctx.lineWidth = 8;
-      ctx.lineCap = 'round';
-      ctx.lineTo(p.x, p.y);
-      ctx.stroke();
-    });
-
-    canvas.addEventListener('pointerup', () => drawingNow = false);
-    canvas.addEventListener('pointercancel', () => drawingNow = false);
-
-    content.querySelector('#a10-clear').addEventListener('click', () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-    });
+    render();
   }
 
   launch.addEventListener('click', () => {
-    overlay.style.display = 'block';
+    overlay.style.display = 'flex';
     home();
   });
 
-  overlay.addEventListener('click', e => {
-    const target = e.target;
+  close.addEventListener('click', () => {
+    overlay.style.display = 'none';
+  });
 
-    if (target.id === 'a10-close') {
-      overlay.style.display = 'none';
-      return;
+  overlay.addEventListener('click', event => {
+    if (event.target === overlay) overlay.style.display = 'none';
+  });
+
+  // Separate Talk to Aadhi voice button
+  const voiceButton = document.createElement('button');
+  voiceButton.id = 'aadhiVoiceOpen';
+  voiceButton.textContent = '🎤 Talk to Aadhi';
+  voiceButton.style.cssText =
+    'position:fixed;bottom:18px;left:14px;z-index:99998;padding:12px 16px;border:0;border-radius:25px;background:#e53935;color:white;font-weight:bold;box-shadow:0 3px 12px #0003;';
+  document.body.appendChild(voiceButton);
+
+  const voicePanel = document.createElement('div');
+  voicePanel.id = 'aadhiVoiceChat';
+  voicePanel.style.cssText =
+    'display:none;position:fixed;z-index:99999;left:12px;right:12px;bottom:75px;max-width:440px;margin:auto;background:#fff;border:2px solid #e53935;border-radius:18px;padding:16px;box-shadow:0 5px 25px #0004;color:#333;max-height:70vh;overflow:auto;';
+  voicePanel.innerHTML = `
+    <h3 style="margin-top:0">🎤 Talk to Aadhi</h3>
+    <p>Choose your language and tap Listen.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="aadhiVoiceEnglish">English</button>
+      <button id="aadhiVoiceTamil">தமிழ்</button>
+    </div>
+    <p id="aadhiVoiceStatus">Ready to listen!</p>
+    <p id="aadhiVoiceHeard" style="word-wrap:break-word"></p>
+    <button id="aadhiVoiceListen">🎙️ Listen</button>
+    <button id="aadhiVoiceStop">Stop</button>
+    <button id="aadhiVoiceClose">Close</button>
+  `;
+  document.body.appendChild(voicePanel);
+
+  let voiceLanguage = 'en-IN';
+
+  voiceButton.addEventListener('click', () => {
+    voicePanel.style.display = 'block';
+  });
+
+  voicePanel.querySelector('#aadhiVoiceClose').addEventListener('click', () => {
+    if (window.AadhiVoice && window.AadhiVoice.cancelListen) {
+      window.AadhiVoice.cancelListen();
     }
+    voicePanel.style.display = 'none';
+  });
 
-    if (target.id === 'a10-back') {
-      home();
-      return;
-    }
+  voicePanel.querySelector('#aadhiVoiceEnglish').addEventListener('click', () => {
+    voiceLanguage = 'en-IN';
+    voicePanel.querySelector('#aadhiVoiceStatus').textContent = 'English selected. Tap Listen!';
+  });
 
-    const card = target.closest('[data-feature]');
-    if (card) {
-      openFeature(Number(card.dataset.feature));
-      return;
-    }
+  voicePanel.querySelector('#aadhiVoiceTamil').addEventListener('click', () => {
+    voiceLanguage = 'ta-IN';
+    voicePanel.querySelector('#aadhiVoiceStatus').textContent = 'தமிழ் தேர்வு செய்யப்பட்டது. Listen அழுத்தவும்!';
+  });
 
-    const sayButton = target.closest('[data-say]');
-    if (sayButton) {
-      speak(sayButton.dataset.say, sayButton.dataset.lang);
-      return;
-    }
-
-    const answer = target.closest('[data-answer]');
-    if (answer) {
-      const result = content.querySelector('#a10-game-result');
-      if (Number(answer.dataset.answer) === Number(answer.dataset.correct)) {
-        result.textContent = 'Correct! Wonderful work! ⭐';
-        earnStar();
-      } else {
-        result.textContent = 'Try again! You can do it! 😊';
-      }
-      progress.games++;
-      save();
-      return;
-    }
-
-    if (target.id === 'a10-parent-speak') {
-      speak(
-        'You have earned ' + progress.stars +
-        ' stars and played ' + progress.games + ' games.',
-        'en'
-      );
+  voicePanel.querySelector('#aadhiVoiceListen').addEventListener('click', () => {
+    if (window.AadhiVoice && window.AadhiVoice.listen) {
+      voicePanel.querySelector('#aadhiVoiceStatus').textContent = 'Listening... பேசுங்கள்!';
+      window.AadhiVoice.listen(voiceLanguage);
+    } else {
+      voicePanel.querySelector('#aadhiVoiceStatus').textContent =
+        'Voice service is unavailable. Please check the app.';
     }
   });
 
-  overlay.addEventListener('change', e => {
-    if (e.target.matches('[data-routine]')) {
-      const id = e.target.dataset.routine;
-      progress.routine[id] = e.target.checked;
-      save();
-      const result = content.querySelector('#a10-routine-result');
-      const completed = Object.values(progress.routine).filter(Boolean).length;
-      result.textContent = completed + ' activities completed. Great job!';
+  voicePanel.querySelector('#aadhiVoiceStop').addEventListener('click', () => {
+    if (window.AadhiVoice && window.AadhiVoice.cancelListen) {
+      window.AadhiVoice.cancelListen();
     }
+    voicePanel.querySelector('#aadhiVoiceStatus').textContent = 'Stopped.';
   });
 
-  home();
-})();
-
-/* Aadhi AI - Voice Conversation */
-
-(function () {
-  if (window.__aadhiVoiceChatAdded) return;
-  window.__aadhiVoiceChatAdded = true;
-
-  function addVoiceChat() {
-    if (document.getElementById("aadhiVoiceChat")) return;
-
-    const panel = document.createElement("div");
-    panel.id = "aadhiVoiceChat";
-
-    panel.style.cssText = `
-      position:fixed;
-      bottom:85px;
-      right:15px;
-      z-index:99999;
-      background:#fff;
-      padding:14px;
-      border-radius:18px;
-      box-shadow:0 3px 15px #0003;
-      width:260px;
-      font-family:Arial,sans-serif;
-      display:none;
-      color:#342f48;
-    `;
-
-    panel.innerHTML = `
-      <b style="font-size:17px;">🎤 Talk to Aadhi</b>
-
-      <p style="font-size:13px;">
-        Choose a language and tap the microphone.
-      </p>
-
-      <select id="aadhiVoiceLanguage"
-        style="width:100%;padding:9px;border-radius:9px;">
-        <option value="en-IN">English</option>
-        <option value="ta-IN">தமிழ்</option>
-      </select>
-
-      <button id="aadhiMicButton"
-        style="width:100%;padding:12px;margin-top:10px;
-        border:0;border-radius:12px;background:#7c4dff;
-        color:white;font-size:16px;">
-        🎤 Speak
-      </button>
-
-      <p id="aadhiVoiceStatus"
-        style="font-size:13px;margin-top:10px;">
-        Ready to listen!
-      </p>
-
-      <p id="aadhiVoiceHeard"
-        style="font-size:14px;word-wrap:break-word;"></p>
-
-      <button id="aadhiVoiceClose"
-        style="padding:8px 14px;border:0;border-radius:8px;">
-        Close
-      </button>
-    `;
-
-    document.body.appendChild(panel);
-
-    const openButton = document.createElement("button");
-    openButton.id = "aadhiVoiceOpen";
-    openButton.innerHTML = "🎤 Talk to Aadhi";
-    openButton.style.cssText = `
-      position:fixed;
-      bottom:20px;
-      right:15px;
-      z-index:99998;
-      border:0;
-      border-radius:25px;
-      padding:13px 18px;
-      background:#7c4dff;
-      color:white;
-      font-weight:bold;
-      box-shadow:0 3px 12px #0003;
-    `;
-
-    document.body.appendChild(openButton);
-
-    openButton.onclick = () => {
-      panel.style.display = "block";
-    };
-
-    document.getElementById("aadhiVoiceClose").onclick = () => {
-      panel.style.display = "none";
-      if (window.AadhiVoice) {
-        AadhiVoice.cancelListen();
-      }
-    };
-
-    document.getElementById("aadhiMicButton").onclick = () => {
-      const language =
-        document.getElementById("aadhiVoiceLanguage").value;
-
-      document.getElementById("aadhiVoiceStatus").textContent =
-        "Listening...";
-
-      document.getElementById("aadhiVoiceHeard").textContent = "";
-
-      if (window.AadhiVoice) {
-        AadhiVoice.listen(language);
-      } else {
-        document.getElementById("aadhiVoiceStatus").textContent =
-          "Voice service unavailable.";
-      }
-    };
-  }
-
-  window.onAadhiSpeechStatus = function (message) {
-    const status = document.getElementById("aadhiVoiceStatus");
-    if (status) status.textContent = message;
+  window.onAadhiSpeechStatus = function(status) {
+    const el = document.getElementById('aadhiVoiceStatus');
+    if (el) el.textContent = status;
   };
 
-  window.onAadhiSpeechError = function (message) {
-    const status = document.getElementById("aadhiVoiceStatus");
-    if (status) status.textContent = message;
+  window.onAadhiSpeechError = function(error) {
+    const el = document.getElementById('aadhiVoiceStatus');
+    if (el) el.textContent = 'Voice error: ' + error;
   };
 
-  window.onAadhiSpeechResult = function (message) {
-    const language =
-      document.getElementById("aadhiVoiceLanguage").value;
-
-    const heard = document.getElementById("aadhiVoiceHeard");
-    const status = document.getElementById("aadhiVoiceStatus");
-
-    if (heard) heard.textContent = "You said: " + message;
-
-    if (status) status.textContent = "Aadhi heard you!";
-
-    if (window.AadhiVoice) {
-      const reply = language === "ta-IN"
-        ? "நீங்கள் சொன்னது எனக்குப் புரிந்தது. அருமை!"
-        : "I heard you! Well done. What would you like to learn today?";
-
-      AadhiVoice.speak(reply, language);
+  window.onAadhiSpeechResult = function(text) {
+    const heard = document.getElementById('aadhiVoiceHeard');
+    const status = document.getElementById('aadhiVoiceStatus');
+    if (heard) heard.textContent = 'You said: ' + text;
+    if (status) {
+      const tamil = /[அ-ஹ]/.test(text);
+      let reply = tamil
+        ? 'வணக்கம்! நன்றாக பேசினீர்கள்! மீண்டும் பேசலாமா?'
+        : 'Hello! Well done! I am happy to talk with you!';
+      status.textContent = reply;
+      speak(reply, tamil ? 'ta' : 'en');
     }
   };
 
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", addVoiceChat);
-  } else {
-    addVoiceChat();
-  }
 })();
