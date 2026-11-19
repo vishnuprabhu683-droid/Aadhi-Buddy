@@ -9,11 +9,20 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.webkit.JavascriptInterface;
 import android.speech.tts.TextToSpeech;
+import android.speech.SpeechRecognizer;
+import android.speech.RecognizerIntent;
+import android.speech.RecognitionListener;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.Manifest;
 import android.media.MediaPlayer;
 import android.content.res.AssetFileDescriptor;
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.util.Locale;
+import java.util.ArrayList;
 import java.io.IOException;
 
 public class MainActivity extends Activity {
@@ -22,6 +31,11 @@ public class MainActivity extends Activity {
     private TextToSpeech tts;
     private boolean ttsReady = false;
     private MediaPlayer player;
+
+    private SpeechRecognizer speechRecognizer;
+    private String pendingLanguage = "en-IN";
+
+    private static final int MIC_PERMISSION = 101;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -58,13 +72,13 @@ public class MainActivity extends Activity {
         public void speak(String text, String language) {
             runOnUiThread(() -> {
                 if (!ttsReady || tts == null || text == null) {
-                    Log.e("AadhiAI", "Text to speech is not ready");
                     return;
                 }
 
                 Locale locale;
 
-                if (language != null && language.toLowerCase().startsWith("ta")) {
+                if (language != null &&
+                    language.toLowerCase().startsWith("ta")) {
                     locale = new Locale("ta", "IN");
                 } else {
                     locale = new Locale("en", "IN");
@@ -74,7 +88,7 @@ public class MainActivity extends Activity {
 
                 if (result == TextToSpeech.LANG_MISSING_DATA ||
                     result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    Log.e("AadhiAI", "Voice language unavailable: " + language);
+                    Log.e("AadhiAI", "Voice language unavailable");
                     return;
                 }
 
@@ -100,6 +114,161 @@ public class MainActivity extends Activity {
         public void playSound(String filename) {
             runOnUiThread(() -> playAssetSound(filename));
         }
+
+        @JavascriptInterface
+        public void listen(String language) {
+            runOnUiThread(() -> {
+                pendingLanguage =
+                    (language != null && language.toLowerCase().startsWith("ta"))
+                    ? "ta-IN" : "en-IN";
+
+                if (checkSelfPermission(Manifest.permission.RECORD_AUDIO)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                    requestPermissions(
+                        new String[]{Manifest.permission.RECORD_AUDIO},
+                        MIC_PERMISSION
+                    );
+                    return;
+                }
+
+                startListening();
+            });
+        }
+
+        @JavascriptInterface
+        public void cancelListen() {
+            runOnUiThread(() -> {
+                if (speechRecognizer != null) {
+                    speechRecognizer.cancel();
+                }
+            });
+        }
+    }
+
+    private void startListening() {
+
+        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            sendSpeechCallback(
+                "onAadhiSpeechError",
+                "Speech recognition is unavailable on this device."
+            );
+            return;
+        }
+
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+        }
+
+        speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
+
+        speechRecognizer.setRecognitionListener(new RecognitionListener() {
+
+            @Override
+            public void onReadyForSpeech(Bundle params) {
+                sendSpeechCallback("onAadhiSpeechStatus", "Listening...");
+            }
+
+            @Override
+            public void onBeginningOfSpeech() {
+            }
+
+            @Override
+            public void onRmsChanged(float rmsdB) {
+            }
+
+            @Override
+            public void onBufferReceived(byte[] buffer) {
+            }
+
+            @Override
+            public void onEndOfSpeech() {
+                sendSpeechCallback("onAadhiSpeechStatus", "Processing...");
+            }
+
+            @Override
+            public void onError(int error) {
+                sendSpeechCallback(
+                    "onAadhiSpeechError",
+                    "I couldn't hear that. Please try again."
+                );
+            }
+
+            @Override
+            public void onResults(Bundle results) {
+                ArrayList<String> matches =
+                    results.getStringArrayList(
+                        SpeechRecognizer.RESULTS_RECOGNITION
+                    );
+
+                if (matches != null && !matches.isEmpty()) {
+                    sendSpeechCallback(
+                        "onAadhiSpeechResult",
+                        matches.get(0)
+                    );
+                } else {
+                    sendSpeechCallback(
+                        "onAadhiSpeechError",
+                        "Please try speaking again."
+                    );
+                }
+            }
+
+            @Override
+            public void onPartialResults(Bundle partialResults) {
+            }
+
+            @Override
+            public void onEvent(int eventType, Bundle params) {
+            }
+        });
+
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+        intent.putExtra(
+            RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+            RecognizerIntent.LANGUAGE_MODEL_FREE_FORM
+        );
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, pendingLanguage);
+        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+        intent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, false);
+
+        speechRecognizer.startListening(intent);
+    }
+
+    private void sendSpeechCallback(String function, String message) {
+        runOnUiThread(() -> {
+            if (webView != null) {
+                String safeMessage = JSONObject.quote(message);
+                String javascript =
+                    "if(window." + function + "){" +
+                    "window." + function + "(" + safeMessage + ");}";
+
+                webView.evaluateJavascript(javascript, null);
+            }
+        });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+        int requestCode,
+        String[] permissions,
+        int[] grantResults
+    ) {
+        super.onRequestPermissionsResult(
+            requestCode, permissions, grantResults
+        );
+
+        if (requestCode == MIC_PERMISSION) {
+            if (grantResults.length > 0 &&
+                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                startListening();
+            } else {
+                sendSpeechCallback(
+                    "onAadhiSpeechError",
+                    "Microphone permission is needed to talk to Aadhi."
+                );
+            }
+        }
     }
 
     private void playAssetSound(String filename) {
@@ -109,7 +278,8 @@ public class MainActivity extends Activity {
         }
 
         try {
-            AssetFileDescriptor afd = getAssets().openFd("www/sounds/" + filename);
+            AssetFileDescriptor afd =
+                getAssets().openFd("www/sounds/" + filename);
 
             player = new MediaPlayer();
             player.setDataSource(
@@ -146,6 +316,11 @@ public class MainActivity extends Activity {
         if (tts != null) {
             tts.stop();
             tts.shutdown();
+        }
+
+        if (speechRecognizer != null) {
+            speechRecognizer.destroy();
+            speechRecognizer = null;
         }
 
         if (player != null) {
