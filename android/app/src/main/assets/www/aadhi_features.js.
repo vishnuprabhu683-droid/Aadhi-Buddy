@@ -1,0 +1,497 @@
+/* Aadhi AI - 10 feature offline add-on */
+(function(){
+  if (window.__aadhi10Loaded) return;
+  window.__aadhi10Loaded = true;
+
+  const STORE = 'aadhi10_progress_v1';
+  let data = {stars:0, routine:{}, badges:[], games:0};
+
+  try {
+    data = Object.assign(data, JSON.parse(localStorage.getItem(STORE)||'{}'));
+  } catch(e){}
+
+  const save = () => {
+    try { localStorage.setItem(STORE, JSON.stringify(data)); } catch(e){}
+  };
+
+  let tamil = false;
+  let recognition = null;
+
+  const words = {
+    talk:{title:'❤️ Talk to Aadhi',ta:'❤️ ஆதியுடன் பேசு'},
+    voice:{title:'🎤 Voice Practice',ta:'🎤 குரல் பயிற்சி'},
+    puzzle:{title:'🧩 Puzzle Games',ta:'🧩 புதிர் விளையாட்டு'},
+    draw:{title:'🎨 Drawing & Colouring',ta:'🎨 ஓவியம் & வண்ணம்'},
+    parent:{title:'👨‍👩‍👧 Parent Dashboard',ta:'👨‍👩‍👧 பெற்றோர் பகுதி'},
+    science:{title:'🔬 Little Scientist',ta:'🔬 குட்டி விஞ்ஞானி'},
+    routine:{title:'⏰ Daily Routine',ta:'⏰ தினசரி பழக்கம்'},
+    safety:{title:'🛡️ Safety School',ta:'🛡️ பாதுகாப்பு பாடம்'},
+    rewards:{title:'🏆 Reward Badges',ta:'🏆 பரிசு பதக்கங்கள்'},
+    stories:{title:'📚 Stories & Rhymes',ta:'📚 கதைகள் & பாடல்கள்'}
+  };
+
+  function say(text, lang){
+    try {
+      if(!window.speechSynthesis) return;
+      speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang || (tamil?'ta-IN':'en-IN');
+      u.rate = 0.85;
+      speechSynthesis.speak(u);
+    } catch(e){}
+  }
+
+  function addStar(n=1){
+    data.stars = (data.stars||0)+n;
+    save();
+  }
+
+  const css = `
+  #aadhi10-launch {
+    position:fixed;right:14px;bottom:18px;z-index:9998;
+    border:0;border-radius:999px;background:#5143c7;color:white;
+    padding:13px 16px;font:bold 15px system-ui;
+    box-shadow:0 4px 14px #0003
+  }
+  #aadhi10 {
+    position:fixed;inset:0;z-index:9999;
+    background:#fff8e9;color:#302c45;font:16px system-ui;
+    overflow:auto;display:none
+  }
+  #aadhi10 * {box-sizing:border-box}
+  #a10head {
+    position:sticky;top:0;background:#fff8e9;padding:12px;
+    display:flex;gap:8px;align-items:center;
+    justify-content:space-between;border-bottom:1px solid #eadfc8
+  }
+  #a10body {padding:14px;max-width:760px;margin:auto}
+  #a10title {font-size:22px;font-weight:900}
+  #aadhi10 button {
+    border:0;border-radius:14px;padding:11px 13px;
+    background:#6655d8;color:white;font-weight:700;margin:4px;
+    cursor:pointer
+  }
+  #aadhi10 button.alt {background:#e9e3ff;color:#39305e}
+  #aadhi10 button.good {background:#168c66}
+  #aadhi10 .tiles {
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px
+  }
+  #aadhi10 .tile {
+    background:white;border-radius:18px;padding:14px 10px;
+    text-align:center;box-shadow:0 2px 8px #0001;min-height:112px
+  }
+  #aadhi10 .tile b {display:block;margin:7px 0}
+  #aadhi10 .tile small {color:#706a80}
+  #aadhi10 .card {
+    background:white;border-radius:18px;padding:15px;
+    margin:10px 0;box-shadow:0 2px 7px #0001
+  }
+  #aadhi10 .big {font-size:42px;text-align:center;margin:12px}
+  #aadhi10 .row {display:flex;flex-wrap:wrap;justify-content:center;gap:6px}
+  #aadhi10 input,#aadhi10 textarea {
+    font:inherit;border:1px solid #ddd;border-radius:12px;padding:10px;width:100%
+  }
+  #a10canvas {
+    background:white;border:2px dashed #b8afea;border-radius:14px;
+    touch-action:none;width:100%;height:300px
+  }
+  #aadhi10 .muted {color:#726c81}
+  #aadhi10 .check {
+    display:block;padding:10px;margin:7px 0;background:#f3efff;border-radius:12px
+  }
+  #aadhi10 .check input {width:auto;margin-right:8px}
+  #aadhi10 .pair {font-size:30px;min-width:70px;min-height:65px}
+  #aadhi10 .story {font-size:19px;line-height:1.6}
+  `;
+
+  document.head.insertAdjacentHTML('beforeend','<style>'+css+'</style>');
+
+  const launch = document.createElement('button');
+  launch.id = 'aadhi10-launch';
+  launch.textContent = '✨ Aadhi AI';
+  document.body.appendChild(launch);
+
+  const overlay = document.createElement('div');
+  overlay.id = 'aadhi10';
+  overlay.innerHTML = `
+    <header id="a10head">
+      <span id="a10title">✨ Aadhi AI — Learn, Feel & Grow</span>
+      <div>
+        <button class="alt" id="a10lang">தமிழ்</button>
+        <button id="a10close">✕</button>
+      </div>
+    </header>
+    <main id="a10body"></main>
+  `;
+  document.body.appendChild(overlay);
+
+  const body = overlay.querySelector('#a10body');
+
+  launch.onclick = () => home();
+  overlay.querySelector('#a10close').onclick = () => overlay.style.display='none';
+
+  overlay.querySelector('#a10lang').onclick = () => {
+    tamil = !tamil;
+    overlay.querySelector('#a10lang').textContent = tamil?'English':'தமிழ்';
+    home();
+  };
+
+  const heading = s => `<h2>${s}</h2>`;
+
+  const btn = (label,fn,alt=false) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    if(alt) b.className='alt';
+    b.onclick=fn;
+    return b;
+  };
+
+  function home(){
+    overlay.style.display='block';
+    body.innerHTML = `
+      <div class="card">
+        🌟 ${tamil?'வணக்கம் குட்டி நண்பா!':'Hello, little friend!'}
+        <br>⭐ ${tamil?'உன் நட்சத்திரங்கள்':'Your stars'}:
+        <b>${data.stars||0}</b>
+      </div>
+      <div class="tiles">
+        ${Object.keys(words).map(k=>`
+          <button class="tile" data-feature="${k}">
+            <div class="big">${words[k].title.split(' ')[0]}</div>
+            <b>${tamil?words[k].ta:words[k].title.slice(3)}</b>
+            <small>${tamil?'தொடங்கலாம்!':'Tap to play'}</small>
+          </button>`).join('')}
+      </div>`;
+    body.querySelectorAll('[data-feature]').forEach(el=>{
+      el.onclick=()=>open(el.dataset.feature);
+    });
+  }
+
+  function open(key){
+    body.innerHTML = heading(tamil?words[key].ta:words[key].title)
+      +`<div id="a10content"></div>`;
+    const c=body.querySelector('#a10content');
+    c.appendChild(btn(tamil?'⬅ முகப்பு':'⬅ Home',home,true));
+    const card=document.createElement('div');
+    card.className='card';
+    c.appendChild(card);
+    ({
+      talk:talk,voice:voice,puzzle:puzzle,draw:draw,
+      parent:parent,science:science,routine:routine,
+      safety:safety,rewards:rewards,stories:stories
+    }[key]||home)(card);
+  }
+
+  /* FEATURE 1 — TALK TO AADHI */
+  function talk(c){
+    c.innerHTML=`
+      <p>${tamil?'நீ எப்படி உணர்கிறாய்?':'How are you feeling?'}</p>
+      <div class="row">
+        ${[['😊','happy'],['😢','sad'],['😠','angry'],['😟','scared'],['🥺','lonely'],['🤗','hug']].map(([e,k])=>`
+          <button data-feel="${k}">
+            ${e} ${tamil?({happy:'மகிழ்ச்சி',sad:'சோகம்',angry:'கோபம்',scared:'பயம்',lonely:'தனிமை',hug:'அணைப்பு'}[k]):k}
+          </button>`).join('')}
+      </div>
+      <div id="reply" class="card"></div>`;
+
+    const replies={
+      happy:['Yay! Keep smiling, little star!','ஆஹா! சிரித்துக்கொண்டே இரு குட்டி நட்சத்திரமே!'],
+      sad:['It is okay to feel sad. Talk to someone you trust.','சோகமாக இருப்பது பரவாயில்லை. நம்பிக்கையான பெரியவரிடம் பேசலாம்.'],
+      angry:['Let us take three slow breaths together.','மூன்று முறை மெதுவாக மூச்சு விடுவோம்.'],
+      scared:['Find a trusted grown-up who can help you feel safe.','பாதுகாப்பாக இருக்க உதவும் நம்பிக்கையான பெரியவரிடம் செல்.'],
+      lonely:['Ask a friend or grown-up to play with you.','நண்பரிடமோ பெரியவரிடமோ சேர்ந்து விளையாடச் சொல்லலாம்.'],
+      hug:['Sending an imaginary hug! Ask someone you love for a real hug too.','ஒரு கற்பனை அணைப்பு! உனக்குப் பிடித்தவரிடம் உண்மையான அணைப்பைக் கேள்.']
+    };
+
+    c.querySelectorAll('[data-feel]').forEach(b=>{
+      b.onclick=()=>{
+        const r=replies[b.dataset.feel][tamil?1:0];
+        c.querySelector('#reply').textContent=r;
+        say(r,tamil?'ta-IN':'en-IN');
+        addStar();
+      };
+    });
+  }
+
+  /* FEATURE 2 — VOICE PRACTICE */
+  function voice(c){
+    const prompts=['Apple','Ball','Cat','Dog','Sun','Moon','அம்மா','அப்பா','வணக்கம்','நன்றி'];
+    let i=0;
+    c.innerHTML=`
+      <p>${tamil?'கேட்டு சொல்லிப் பழகு':'Listen and repeat'}</p>
+      <div class="big" id="vp">${prompts[0]}</div>
+      <div class="row">
+        <button id="vlisten">🔊 ${tamil?'கேள்':'Listen'}</button>
+        <button id="vnext" class="alt">➡ ${tamil?'அடுத்து':'Next'}</button>
+        <button id="vrec" class="alt">🎙️ ${tamil?'பேசு':'Speak'}</button>
+      </div>
+      <p id="vresult"></p>`;
+
+    c.querySelector('#vlisten').onclick=()=>{
+      say(prompts[i],/^[\u0B80-\u0BFF]/.test(prompts[i])?'ta-IN':'en-IN');
+    };
+    c.querySelector('#vnext').onclick=()=>{
+      i=(i+1)%prompts.length;
+      c.querySelector('#vp').textContent=prompts[i];
+    };
+    c.querySelector('#vrec').onclick=()=>{
+      const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+      if(!SR){
+        c.querySelector('#vresult').textContent=tamil
+          ? 'குரல் அடையாளம் இந்த சாதனத்தில் இல்லை.'
+          : 'Speech recognition is unavailable on this device.';
+        return;
+      }
+      recognition=new SR();
+      recognition.lang=/^[\u0B80-\u0BFF]/.test(prompts[i])?'ta-IN':'en-IN';
+      recognition.onresult=e=>{
+        const heard=e.results[0][0].transcript;
+        c.querySelector('#vresult').textContent=(tamil?'நீ சொன்னது: ':'You said: ')+heard;
+        addStar();
+      };
+      recognition.onerror=()=>{
+        c.querySelector('#vresult').textContent=tamil?'மீண்டும் முயற்சி செய்!':'Try again!';
+      };
+      recognition.start();
+    };
+  }
+  /* FEATURE 3 — MEMORY PUZZLE */
+  function puzzle(c){
+    const emojis=['🐶','🐱','🦁','🐸','🐼','🐵'];
+    let cards=[...emojis,...emojis].sort(()=>Math.random()-0.5);
+    let first=null, lock=false, matched=0;
+    c.innerHTML=`
+      <p>${tamil?'ஒரே மாதிரியான படங்களைக் கண்டுபிடி!':'Find matching pictures!'}</p>
+      <div class="tiles" id="pgrid"></div>
+      <p id="pmsg"></p>`;
+    const grid=c.querySelector('#pgrid');
+    cards.forEach((emoji,i)=>{
+      const b=document.createElement('button');
+      b.className='tile pair alt';
+      b.textContent='❓';
+      b.dataset.i=i;
+      b.onclick=()=>{
+        if(lock||b.dataset.done||b===first)return;
+        b.textContent=emoji;
+        if(!first){first=b;return;}
+        if(cards[first.dataset.i]===emoji){
+          b.dataset.done=first.dataset.done='1';
+          matched+=2;first=null;
+          addStar(2);
+          if(matched===cards.length){
+            c.querySelector('#pmsg').textContent=tamil?'அருமை! வெற்றி! ⭐':'Great job! You won! ⭐';
+            say(tamil?'அருமை!':'Great job!');
+          }
+        }else{
+          lock=true;
+          const prev=first;
+          first=null;
+          setTimeout(()=>{b.textContent='❓';prev.textContent='❓';lock=false;},750);
+        }
+      };
+      grid.appendChild(b);
+    });
+  }
+
+  /* FEATURE 4 — DRAWING */
+  function draw(c){
+    c.innerHTML=`
+      <p>${tamil?'உனக்குப் பிடித்த வண்ணத்தில் வரை!':'Draw anything you like!'}</p>
+      <div class="row" id="colors">
+        ${['#e53935','#ff9800','#fdd835','#43a047','#1e88e5','#8e24aa','#222222','#ffffff'].map(col=>`
+          <button data-color="${col}" style="background:${col};width:38px;height:38px;border:2px solid #aaa;padding:0"></button>`).join('')}
+      </div>
+      <canvas id="a10canvas" width="600" height="400"></canvas>
+      <div class="row">
+        <button id="clearDraw" class="alt">${tamil?'அழி':'Clear'}</button>
+      </div>`;
+    const canvas=c.querySelector('#a10canvas'),ctx=canvas.getContext('2d');
+    ctx.lineCap='round';ctx.lineJoin='round';ctx.lineWidth=8;
+    let color='#e53935',drawing=false;
+    c.querySelector('#colors').onclick=e=>{
+      if(e.target.dataset.color)color=e.target.dataset.color;
+    };
+    function pos(e){
+      const r=canvas.getBoundingClientRect();
+      return {x:(e.clientX-r.left)*canvas.width/r.width,
+              y:(e.clientY-r.top)*canvas.height/r.height};
+    }
+    canvas.onpointerdown=e=>{drawing=true;canvas.setPointerCapture(e.pointerId);const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);};
+    canvas.onpointermove=e=>{
+      if(!drawing)return;
+      const p=pos(e);ctx.strokeStyle=color;ctx.lineTo(p.x,p.y);ctx.stroke();
+    };
+    canvas.onpointerup=canvas.onpointercancel=()=>drawing=false;
+    c.querySelector('#clearDraw').onclick=()=>ctx.clearRect(0,0,canvas.width,canvas.height);
+  }
+
+  /* FEATURE 5 — PARENT DASHBOARD */
+  function parent(c){
+    c.innerHTML=`
+      <p>${tamil?'பெற்றோருக்கான பகுதி':'Parents only'}</p>
+      <button id="parentEnter">${tamil?'திறக்கவும்':'Open dashboard'}</button>
+      <div id="parentData"></div>`;
+    c.querySelector('#parentEnter').onclick=()=>{
+      const answer=prompt(tamil?'பெற்றோர் கணக்கு: 6 + 2 = ?':'Parent check: 6 + 2 = ?');
+      if(answer!=='8'){
+        c.querySelector('#parentData').textContent=tamil?'மீண்டும் முயற்சி செய்யுங்கள்.':'Please try again.';
+        return;
+      }
+      c.querySelector('#parentData').innerHTML=`
+        <div class="card">
+          <h3>⭐ ${tamil?'நட்சத்திரங்கள்':'Stars'}: ${data.stars}</h3>
+          <p>${tamil?'விளையாட்டுகள் முடித்தது':'Games completed'}: ${data.games||0}</p>
+          <p>${tamil?'பெற்ற பதக்கங்கள்':'Badges earned'}: ${(data.badges||[]).length}</p>
+          <p>${tamil?'தினசரி பழக்கங்கள்':'Daily routines'}: ${Object.values(data.routine||{}).filter(Boolean).length}</p>
+          <button id="resetStars" class="alt">${tamil?'நட்சத்திரங்களை மீட்டமை':'Reset stars'}</button>
+        </div>`;
+      c.querySelector('#resetStars').onclick=()=>{
+        if(confirm(tamil?'நட்சத்திரங்களை அழிக்கவா?':'Reset stars?')){
+          data.stars=0;save();parent(c);
+        }
+      };
+    };
+  }
+
+  /* FEATURE 6 — LITTLE SCIENTIST */
+  function science(c){
+    const facts=[
+      ['🌞','The Sun gives Earth light and warmth.','சூரியன் பூமிக்கு ஒளியும் வெப்பமும் தருகிறது.'],
+      ['🌱','Plants need water, sunlight and air to grow.','தாவரங்கள் வளர நீர், சூரிய ஒளி மற்றும் காற்று தேவை.'],
+      ['🌈','Rain and sunlight can make a rainbow.','மழையும் சூரிய ஒளியும் வானவில் உருவாக்கலாம்.'],
+      ['🧲','Magnets can attract some metal objects.','காந்தம் சில உலோகப் பொருட்களை ஈர்க்கும்.'],
+      ['🌙','The Moon moves around Earth.','நிலவு பூமியைச் சுற்றி வருகிறது.'],
+      ['🫧','Soap bubbles are filled with air.','சோப்பு குமிழ்களில் காற்று உள்ளது.']
+    ];
+    c.innerHTML=`
+      <p>${tamil?'அறிவியல் உண்மைகளை அறிந்து கொள்வோம்!':'Discover science!'}</p>
+      <div class="big" id="sfemoji">🔬</div>
+      <div class="story" id="sftext"></div>
+      <button id="sfnext">${tamil?'அடுத்த உண்மை':'Next fact'} ➡</button>`;
+    let i=-1;
+    c.querySelector('#sfnext').onclick=()=>{
+      i=(i+1)%facts.length;
+      c.querySelector('#sfemoji').textContent=facts[i][0];
+      c.querySelector('#sftext').textContent=facts[i][tamil?2:1];
+      say(facts[i][tamil?2:1],tamil?'ta-IN':'en-IN');
+      addStar();
+    };
+  }
+
+  /* FEATURE 7 — DAILY ROUTINE */
+  function routine(c){
+    const items=[
+      ['☀️','Wake up','எழுந்திரு'],
+      ['🪥','Brush my teeth','பல் துலக்கு'],
+      ['🛁','Take a bath','குளி'],
+      ['🍎','Eat healthy food','ஆரோக்கியமான உணவு சாப்பிடு'],
+      ['🎒','Get ready to learn','படிக்கத் தயாராகு'],
+      ['🧸','Put toys away','பொம்மைகளை ஒழுங்காக வை'],
+      ['🌙','Sleep on time','சரியான நேரத்தில் தூங்கு']
+    ];
+    c.innerHTML=`<p>${tamil?'இன்றைய பழக்கங்கள்':'Today’s routine'}</p>
+      <div id="rlist"></div><p id="rmsg"></p>
+      <button id="rreset" class="alt">${tamil?'மீண்டும் தொடங்கு':'Reset checklist'}</button>`;
+    const list=c.querySelector('#rlist');
+    items.forEach((it,i)=>{
+      const label=document.createElement('label');
+      label.className='check';
+      label.innerHTML=`<input type="checkbox"> ${it[0]} ${tamil?it[2]:it[1]}`;
+      const box=label.querySelector('input');
+      box.checked=!!data.routine[i];
+      box.onchange=()=>{
+        data.routine[i]=box.checked;save();
+        if(box.checked)addStar();
+        const done=items.filter((_,j)=>data.routine[j]).length;
+        c.querySelector('#rmsg').textContent=done===items.length
+          ?(tamil?'அருமை! எல்லா பழக்கங்களையும் முடித்துவிட்டாய்!':'Amazing! You finished all routines!')
+          :`${done}/${items.length}`;
+        if(done===items.length)say(tamil?'அருமை!':'Amazing! Great work!');
+      };
+      list.appendChild(label);
+    });
+    c.querySelector('#rreset').onclick=()=>{
+      data.routine={};save();routine(c);
+    };
+  }
+
+  /* FEATURE 8 — SAFETY SCHOOL */
+  function safety(c){
+    const lessons=[
+      ['🧑‍🤝‍🧑','Stay close to a trusted grown-up in crowded places.','கூட்டமான இடங்களில் நம்பிக்கையான பெரியவருடன் இரு.'],
+      ['🚦','Stop, look both ways and cross with an adult.','நில், இருபுறமும் பார், பெரியவருடன் சாலையைக் கட.'],
+      ['🛡️','Your body belongs to you. You can say NO to unwanted touch.','உன் உடல் உனக்குச் சொந்தம். விரும்பாத தொடுதலுக்கு NO சொல்லலாம்.'],
+      ['📢','If something feels unsafe, tell a trusted grown-up.','பாதுகாப்பற்றதாக உணர்ந்தால் நம்பிக்கையான பெரியவரிடம் சொல்.'],
+      ['🚪','Never go anywhere with someone without your trusted adult’s permission.','நம்பிக்கையான பெரியவரின் அனுமதியின்றி யாருடனும் எங்கும் செல்லாதே.']
+    ];
+    c.innerHTML=`
+      <p>${tamil?'பாதுகாப்பாக இருக்கக் கற்றுக்கொள்வோம்':'Learn how to stay safe'}</p>
+      <div class="big" id="semo">🛡️</div>
+      <div class="story" id="stext"></div>
+      <button id="snext">${tamil?'அடுத்த பாடம்':'Next lesson'} ➡</button>`;
+    let i=-1;
+    c.querySelector('#snext').onclick=()=>{
+      i=(i+1)%lessons.length;
+      c.querySelector('#semo').textContent=lessons[i][0];
+      c.querySelector('#stext').textContent=lessons[i][tamil?2:1];
+      say(lessons[i][tamil?2:1],tamil?'ta-IN':'en-IN');
+    };
+  }
+
+  /* FEATURE 9 — REWARD BADGES */
+  function rewards(c){
+    const badgeList=[
+      ['🌟','First Star',1],
+      ['🎮','Playful Learner',5],
+      ['🧠','Puzzle Master',10],
+      ['📚','Story Explorer',15],
+      ['🏆','Super Star',25]
+    ];
+    const earned=badgeList.filter(b=>data.stars>=b[2]);
+    c.innerHTML=`
+      <p>${tamil?'நட்சத்திரங்களைச் சேகரித்து பதக்கங்களை வெல்!':'Collect stars to earn badges!'}</p>
+      <h2>⭐ ${data.stars} ${tamil?'நட்சத்திரங்கள்':'Stars'}</h2>
+      <div class="tiles">
+        ${badgeList.map(b=>`
+          <div class="tile">
+            <div class="big">${data.stars>=b[2]?b[0]:'🔒'}</div>
+            <b>${tamil?'பதக்கம்':b[1]}</b>
+            <small>${b[2]} ⭐</small>
+          </div>`).join('')}
+      </div>`;
+    if(earned.length)say(tamil?`உனக்கு ${earned.length} பதக்கங்கள் கிடைத்துள்ளன!`:`You have earned ${earned.length} badges!`);
+  }
+
+  /* FEATURE 10 — STORIES & RHYMES */
+  function stories(c){
+    const tale=[
+      ['🐰','The Little Rabbit','Once upon a time, a little rabbit shared carrots with a hungry friend. They smiled and played together all day. Sharing made them both happy!','ஒரு குட்டி முயல் பசியுடன் இருந்த நண்பனுடன் கேரட்டை பகிர்ந்து கொண்டது. இருவரும் மகிழ்ச்சியாக விளையாடினர். பகிர்வது மகிழ்ச்சி தரும்!'],
+      ['🐘','The Kind Elephant','A little elephant helped a bird find its nest. The bird sang a happy song. Kindness makes the world beautiful!','ஒரு குட்டி யானை பறவைக்கு அதன் கூட்டைக் கண்டுபிடிக்க உதவியது. பறவை மகிழ்ச்சியாகப் பாடியது. அன்பு உலகை அழகாக்கும்!'],
+      ['🌧️','The Rainy Day','A tiny seed drank the rain. The warm sun came out. The seed grew into a beautiful flower!','ஒரு சிறிய விதை மழை நீரைப் பருகியது. சூரியன் வந்ததும் விதை அழகான பூவாக வளர்ந்தது!']
+    ];
+    c.innerHTML=`
+      <div class="big" id="stemoji">📚</div>
+      <h3 id="sttitle"></h3>
+      <div class="story" id="ststory"></div>
+      <div class="row">
+        <button id="stread">🔊 ${tamil?'கேள்':'Read aloud'}</button>
+        <button id="stnext" class="alt">➡ ${tamil?'அடுத்து':'Next story'}</button>
+      </div>`;
+    let i=-1;
+    function show(){
+      i=(i+1)%tale.length;
+      c.querySelector('#stemoji').textContent=tale[i][0];
+      c.querySelector('#sttitle').textContent=tale[i][1];
+      c.querySelector('#ststory').textContent=tale[i][tamil?3:2];
+      addStar();
+    }
+    c.querySelector('#stnext').onclick=show;
+    c.querySelector('#stread').onclick=()=>{
+      if(i>=0)say(tale[i][tamil?3:2],tamil?'ta-IN':'en-IN');
+    };
+    show();
+  }
+
+  /* INIT */
+  home();
+})();
