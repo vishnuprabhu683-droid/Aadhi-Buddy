@@ -588,6 +588,95 @@ function openPageNumbers() {
   renderNumber();
 }
 
+let kuralList = [];
+let currentKuralIndex = 0;
+
+async function loadKuralData() {
+  const area = document.getElementById('kuralContent');
+
+  if (!area) return;
+
+  area.innerHTML = 'திருக்குறள்கள் ஏற்றப்படுகின்றன...';
+
+  try {
+    if (kuralList.length === 0) {
+      const response = await fetch('thirukkural.json');
+
+      if (!response.ok) {
+        throw new Error('Could not load file');
+      }
+
+      const data = await response.json();
+      kuralList = data.kural;
+    }
+
+    currentKuralIndex = 0;
+    renderKural();
+  } catch (error) {
+    area.innerHTML =
+      'திருக்குறள் தரவை ஏற்ற முடியவில்லை. கோப்பைச் சரிபார்க்கவும்.';
+  }
+}
+
+function renderKural() {
+  const area = document.getElementById('kuralContent');
+
+  if (!area || !kuralList.length) return;
+
+  const k = kuralList[currentKuralIndex];
+
+  area.innerHTML = `
+    <div class="lesson-card">
+      <h3>குறள் எண்: ${k.Number}</h3>
+      <p>அதிகாரம் ${Math.ceil(k.Number / 10)}</p>
+
+      <h2>${k.Line1}</h2>
+      <h2>${k.Line2}</h2>
+
+      <p><b>எளிய தமிழ் பொருள்:</b></p>
+      <p>${k.sp || k.mv || ''}</p>
+
+      <p><b>English Meaning:</b></p>
+      <p>${k.explanation || k.Translation || ''}</p>
+
+      <button class="btn"
+        onclick="say('${String(k.Line1 + ' ' + k.Line2).replace(/'/g, "\\'")}', 'ta-IN')">
+        🔊 குறளைக் கேட்க
+      </button>
+
+      <button class="btn"
+        onclick="say('${String(k.Translation || '').replace(/'/g, "\\'")}', 'en-IN')">
+        🔊 English
+      </button>
+    </div>
+  `;
+
+  const numberBox = document.getElementById('kuralNumber');
+  if (numberBox) numberBox.value = k.Number;
+}
+
+function loadKuralByNumber() {
+  const box = document.getElementById('kuralNumber');
+  const number = Number(box.value);
+
+  if (number < 1 || number > 1330 || !Number.isInteger(number)) {
+    alert('1 முதல் 1330 வரை குறள் எண்ணை உள்ளிடவும்');
+    return;
+  }
+
+  currentKuralIndex = number - 1;
+  renderKural();
+}
+
+function moveKural(direction) {
+  const next = currentKuralIndex + direction;
+
+  if (next < 0 || next >= kuralList.length) return;
+
+  currentKuralIndex = next;
+  renderKural();
+}
+
 const originalOpenPage = openPage;
 openPage = function(id) {
   originalOpenPage(id);
