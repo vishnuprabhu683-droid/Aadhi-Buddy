@@ -592,30 +592,18 @@ function openPageNumbers() {
 let kuralList = [];
 let currentKuralIndex = 0;
 
-async function loadKuralData() {
+function loadKuralData() {
   const area = document.getElementById('kuralContent');
 
   if (!area) return;
 
-  area.innerHTML = 'திருக்குறள்கள் ஏற்றப்படுகின்றன...';
-
-  try {
-    if (kuralList.length === 0) {
-      const response = await fetch('thirukkural.json');
-
-      if (!response.ok) {
-        throw new Error('Could not load file');
-      }
-
-      const data = await response.json();
-      kuralList = data.kural;
-    }
-
+  if (window.THIRUKKURAL_DATA &&
+      window.THIRUKKURAL_DATA.kural) {
+    kuralList = window.THIRUKKURAL_DATA.kural;
     currentKuralIndex = 0;
     renderKural();
-  } catch (error) {
-    area.innerHTML =
-      'திருக்குறள் தரவை ஏற்ற முடியவில்லை. கோப்பைச் சரிபார்க்கவும்.';
+  } else {
+    area.innerHTML = 'திருக்குறள் தரவு கிடைக்கவில்லை!';
   }
 }
 
