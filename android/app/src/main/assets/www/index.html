@@ -474,6 +474,7 @@ function openPage(id) {
       <p class="note">Aadhi Buddy uses pre-written child-friendly conversations in this offline version. It is not a live AI chat.</p>
     `],
 
+ 
     kindness: ['🤝 Kindness Club', `
       <p>Your friend dropped their crayons. What will you do?</p>
       <div class="big">🖍️ 🖍️ 🖍️</div>
@@ -482,8 +483,21 @@ function openPage(id) {
         <button class="answer" onclick="kindness(this,false)">Walk away / போய்விடுவேன்</button>
       </div>
       <div id="kindReply"></div>
+    `],
+
+    thirukkural: ['📜 திருக்குறள் - 1330', `
+      <h3>திருக்குறள் கற்போம்</h3>
+      <p>அனைத்து 133 அதிகாரங்களும் 1,330 குறள்களும்</p>
+      <input id="kuralNumber" type="number" min="1" max="1330" placeholder="குறள் எண்ணை உள்ளிடுக">
+      <button class="btn" onclick="loadKuralByNumber()">குறளைப் பார்க்க</button>
+      <div id="kuralContent"></div>
+      <div class="lesson-actions">
+        <button class="btn secondary" onclick="moveKural(-1)">⬅ முந்தையது</button>
+        <button class="btn" onclick="moveKural(1)">அடுத்தது ➡</button>
+      </div>
     `]
   };
+
 
   if (pages[id]) show(pages[id][0],pages[id][1]);
 }
