@@ -27,7 +27,16 @@ jobs:
         with:
           gradle-version: '8.9'
 
+      - name: Prepare signing key
+        env:
+          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
+        run: |
+          echo "$SIGNING_KEY_BASE64" | base64 --decode > android/app/aadhi-release.jks
+
       - name: Build APK
+        env:
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: gradle -p android assembleDebug
 
       - name: Upload APK
