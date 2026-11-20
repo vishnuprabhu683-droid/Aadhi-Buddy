@@ -313,7 +313,136 @@
     }
   }
 
-  function puzzle() {
+    function calendar() {
+    const today = new Date();
+    let shownMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    let selectedDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+    const specialDays = {
+      '01-01': "🎉 New Year's Day",
+      '01-14': '🌾 Pongal celebrations',
+      '01-15': '🐄 Mattu Pongal',
+      '01-16': '👨‍👩‍👧 Kaanum Pongal',
+      '01-26': '🇮🇳 Republic Day',
+      '02-14': '❤️ Valentine’s Day',
+      '03-08': '👩 International Women’s Day',
+      '04-14': '🌸 Tamil New Year',
+      '04-22': '🌍 Earth Day',
+      '05-01': '👷 Labour Day',
+      '06-05': '🌱 World Environment Day',
+      '06-21': '🧘 International Yoga Day',
+      '07-11': '👨‍👩‍👧 World Population Day',
+      '08-15': '🇮🇳 Independence Day',
+      '09-05': '👩‍🏫 Teachers’ Day (India)',
+      '09-16': '🌿 World Ozone Day',
+      '10-02': '🕊️ Gandhi Jayanti',
+      '10-16': '🍎 World Food Day',
+      '11-14': '👶 Children’s Day (India)',
+      '12-25': '🎄 Christmas Day'
+    };
+
+    function dateKey(date) {
+      return String(date.getMonth() + 1).padStart(2, '0') + '-' +
+        String(date.getDate()).padStart(2, '0');
+    }
+
+    function renderCalendar() {
+      const year = shownMonth.getFullYear();
+      const month = shownMonth.getMonth();
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const monthName = shownMonth.toLocaleString('en-IN', {
+        month: 'long',
+        year: 'numeric'
+      });
+
+      let cells = '';
+      for (let i = 0; i < firstDay; i++) {
+        cells += '<div></div>';
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day);
+        const key = dateKey(date);
+        const isToday = date.toDateString() === today.toDateString();
+        const isSelected = date.toDateString() === selectedDate.toDateString();
+        const hasEvent = !!specialDays[key];
+
+        cells += `
+          <button type="button" data-cal-day="${day}"
+            style="padding:9px 2px;border-radius:10px;border:2px solid ${isSelected ? '#6c4bd8' : 'transparent'};
+            background:${isToday ? '#6c4bd8' : '#fff'};
+            color:${isToday ? '#fff' : '#302b43'};
+            font-weight:${isToday || hasEvent ? 'bold' : 'normal'};
+            min-height:40px;position:relative;">
+            ${day}${hasEvent ? '<span style="color:#e65b35">•</span>' : ''}
+          </button>`;
+      }
+
+      const selectedKey = dateKey(selectedDate);
+      const selectedEvent = specialDays[selectedKey] || '🌈 No special event listed. Make today wonderful!';
+
+      content.innerHTML = `
+        <section class="a10-panel">
+          <button class="a10-back" id="a10-back" type="button">← Back</button>
+          <h2>📅 My Calendar</h2>
+          <p style="text-align:center;font-size:18px;font-weight:bold;">
+            Today: ${today.toLocaleDateString('en-IN', {
+              day: 'numeric', month: 'long', year: 'numeric'
+            })}
+          </p>
+          <div class="a10-row" style="justify-content:space-between">
+            <button id="cal-prev" type="button">◀</button>
+            <strong>${monthName}</strong>
+            <button id="cal-next" type="button">▶</button>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;gap:3px;margin-top:12px;">
+            ${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d =>
+              `<strong style="font-size:12px;padding:5px 0">${d}</strong>`).join('')}
+            ${cells}
+          </div>
+          <div style="background:#f7f3ff;border-radius:12px;padding:12px;margin-top:14px;">
+            <h3>📌 ${selectedDate.toLocaleDateString('en-IN', {
+              day:'numeric', month:'long', year:'numeric'
+            })}</h3>
+            <p>${selectedEvent}</p>
+          </div>
+          <h3>🌟 Important Days</h3>
+          <div class="a10-muted">
+            ${Object.entries(specialDays)
+              .filter(([key]) => {
+                const [m, d] = key.split('-').map(Number);
+                return new Date(year, m - 1, d) >= new Date(year, month, 1) &&
+                       new Date(year, m - 1, d) <= new Date(year, month + 1, 0);
+              })
+              .map(([key, event]) => {
+                const [m, d] = key.split('-').map(Number);
+                return `<p>📅 ${d}/${m} — ${event}</p>`;
+              }).join('') || '<p>No listed special days this month.</p>'}
+          </div>
+          <p style="font-size:12px;color:#777">🟣 Today &nbsp; 🟠 Special day</p>
+        </section>`;
+
+      content.querySelector('#a10-back').addEventListener('click', home);
+      content.querySelector('#cal-prev').addEventListener('click', () => {
+        shownMonth = new Date(year, month - 1, 1);
+        renderCalendar();
+      });
+      content.querySelector('#cal-next').addEventListener('click', () => {
+        shownMonth = new Date(year, month + 1, 1);
+        renderCalendar();
+      });
+      content.querySelectorAll('[data-cal-day]').forEach(button => {
+        button.addEventListener('click', () => {
+          selectedDate = new Date(year, month, Number(button.dataset.calDay));
+          renderCalendar();
+        });
+      });
+    }
+
+    renderCalendar();
+  }
+function puzzle() {
     const questions = [
       { q: 'Which one is a fruit?', choices: ['🍎 Apple', '🚗 Car', '⚽ Ball'], answer: 0 },
       { q: 'Which animal says meow?', choices: ['🐶 Dog', '🐱 Cat', '🐮 Cow'], answer: 1 },
