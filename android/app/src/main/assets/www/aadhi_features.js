@@ -303,8 +303,12 @@
         `);
         break;
 
-      case 9:
+            case 9:
         stories();
+        break;
+
+      case 10:
+        calendar();
         break;
     }
   }
