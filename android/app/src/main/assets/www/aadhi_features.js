@@ -537,7 +537,7 @@ function puzzle() {
       ctx.clearRect(0, 0, canvas.width, canvas.height));
   }
 
-  function routine() {
+    function routine() {
     const tasks = [
       ['wake', 'Wake up and smile ☀️'],
       ['brush', 'Brush my teeth 🪥'],
@@ -546,7 +546,20 @@ function puzzle() {
       ['play', 'Play and exercise ⚽'],
       ['sleep', 'Get ready for bed 🌙']
     ];
+
+    // Automatically get today's date from the device
+    const today = new Date();
+    const todayText = today.toLocaleDateString('en-IN', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+
     panel('📅 Daily Routine', `
+      <p style="text-align:center;font-weight:bold;color:#5538b5;font-size:17px;">
+        📆 ${todayText}
+      </p>
       <p>Tick each activity when you finish it.</p>
       <div class="a10-routine">
         ${tasks.map(([id, label]) =>
@@ -554,13 +567,16 @@ function puzzle() {
       </div>
       <p id="a10-routine-result">${tasks.filter(([id]) => progress.routine[id]).length} activities completed. Great job!</p>
     `);
+
     content.querySelectorAll('[data-routine]').forEach(box => {
       box.addEventListener('change', () => {
         progress.routine[box.dataset.routine] = box.checked;
         saveProgress();
+
         const done = tasks.filter(([id]) => progress.routine[id]).length;
         content.querySelector('#a10-routine-result').textContent =
           done + ' of ' + tasks.length + ' activities completed. Great job!';
+
         if (done === tasks.length) {
           earnStar();
           content.querySelector('#a10-routine-result').textContent += ' ⭐ You earned a star!';
