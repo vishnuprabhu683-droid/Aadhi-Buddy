@@ -155,8 +155,9 @@
     ['📅', 'Daily Routine'],
     ['🛡️', 'Safety School'],
     ['🏆', 'Reward Badges'],
-    ['📖', 'Stories & Rhymes']
-  ];
+    ['📖', 'Stories & Rhymes'],
+    ['📅', 'Calendar']
+];
 
   function home() {
     content.innerHTML = `
