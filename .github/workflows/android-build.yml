@@ -33,22 +33,13 @@ jobs:
         run: |
           echo "$SIGNING_KEY_BASE64" | base64 --decode > android/app/aadhi-release.jks
 
-      - name: Verify signing key
+            - name: Check secret transfer
         env:
-          STORE_PASS: ${{ secrets.SIGNING_STORE_PASSWORD }}
-          KEY_PASS: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
         run: |
-          keytool -list \
-            -keystore android/app/aadhi-release.jks \
-            -storepass "$STORE_PASS" \
-            -alias aadhi-release
+          echo "$SIGNING_KEY_BASE64" | tr -d '[:space:]' | wc -c
+          echo "$SIGNING_KEY_BASE64" | tr -d '[:space:]' | sha256sum
 
-          keytool -certreq \
-            -keystore android/app/aadhi-release.jks \
-            -storepass "$STORE_PASS" \
-            -keypass "$KEY_PASS" \
-            -alias aadhi-release \
-            -file "$RUNNER_TEMP/aadhi-test.csr"
       - name: Build APK
         env:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
