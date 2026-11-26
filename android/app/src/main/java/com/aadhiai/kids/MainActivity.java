@@ -2,7 +2,10 @@
 package com.aadhiai.kids;
 
 import android.app.Activity;
+import android.app.DownloadManager;
 import android.os.Bundle;
+import android.os.Build;
+import android.os.Environment;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -14,16 +17,25 @@ import android.speech.RecognizerIntent;
 import android.speech.RecognitionListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.Manifest;
 import android.media.MediaPlayer;
 import android.content.res.AssetFileDescriptor;
+import android.net.Uri;
+import android.provider.Settings;
+import android.database.Cursor;
 import android.util.Log;
+
+import androidx.core.content.FileProvider;
 
 import org.json.JSONObject;
 
 import java.util.Locale;
 import java.util.ArrayList;
 import java.io.IOException;
+import java.io.File;
 
 public class MainActivity extends Activity {
 
@@ -36,6 +48,10 @@ public class MainActivity extends Activity {
     private String pendingLanguage = "en-IN";
 
     private static final int MIC_PERMISSION = 101;
+
+    private String pendingApkUrl = null;
+    private long downloadId = -1;
+    private BroadcastReceiver downloadReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -144,6 +160,177 @@ public class MainActivity extends Activity {
                 }
             });
         }
+
+        @JavascriptInterface
+        public void downloadAndInstall(String apkUrl) {
+            runOnUiThread(() -> {
+                if (apkUrl == null || !apkUrl.startsWith("https://")) {
+                    Log.e("AadhiAI", "Invalid APK URL");
+                    return;
+                }
+
+                if (Build.VERSION.SDK_INT >= 26 &&
+                    !getPackageManager().canRequestPackageInstalls()) {
+
+                    pendingApkUrl = apkUrl;
+
+                    Intent intent = new Intent(
+                        Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                        Uri.parse("package:" + getPackageName())
+                    );
+
+                    startActivity(intent);
+                    return;
+                }
+
+                startApkDownload(apkUrl);
+            });
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        if (pendingApkUrl != null &&
+            (Build.VERSION.SDK_INT < 26 ||
+             getPackageManager().canRequestPackageInstalls())) {
+
+            String url = pendingApkUrl;
+            pendingApkUrl = null;
+            startApkDownload(url);
+        }
+    }
+
+    private void startApkDownload(String apkUrl) {
+        try {
+            DownloadManager manager =
+                (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+
+            if (manager == null) {
+                Log.e("AadhiAI", "Download service unavailable");
+                return;
+            }
+
+            DownloadManager.Request request =
+                new DownloadManager.Request(Uri.parse(apkUrl));
+
+            request.setTitle("Aadhi AI Update");
+            request.setDescription("Downloading the latest version...");
+            request.setNotificationVisibility(
+                DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+            );
+
+            request.setDestinationInExternalFilesDir(
+                this,
+                Environment.DIRECTORY_DOWNLOADS,
+                "AadhiAI-update.apk"
+            );
+
+            if (downloadReceiver != null) {
+                try {
+                    unregisterReceiver(downloadReceiver);
+                } catch (Exception ignored) {
+                }
+                downloadReceiver = null;
+            }
+
+            downloadReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    long id = intent.getLongExtra(
+                        DownloadManager.EXTRA_DOWNLOAD_ID, -1
+                    );
+
+                    if (id == downloadId) {
+                        checkDownloadResult(manager);
+                    }
+                }
+            };
+
+            IntentFilter filter = new IntentFilter(
+                DownloadManager.ACTION_DOWNLOAD_COMPLETE
+            );
+
+            if (Build.VERSION.SDK_INT >= 33) {
+                registerReceiver(
+                    downloadReceiver,
+                    filter,
+                    Context.RECEIVER_NOT_EXPORTED
+                );
+            } else {
+                registerReceiver(downloadReceiver, filter);
+            }
+
+            downloadId = manager.enqueue(request);
+
+        } catch (Exception e) {
+            Log.e("AadhiAI", "Download failed", e);
+        }
+    }
+
+    private void checkDownloadResult(DownloadManager manager) {
+        DownloadManager.Query query =
+            new DownloadManager.Query().setFilterById(downloadId);
+
+        try (Cursor cursor = manager.query(query)) {
+            if (cursor != null && cursor.moveToFirst()) {
+                int status = cursor.getInt(
+                    cursor.getColumnIndexOrThrow(
+                        DownloadManager.COLUMN_STATUS
+                    )
+                );
+
+                if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                    installDownloadedApk();
+                } else {
+                    Log.e("AadhiAI", "APK download was not successful");
+                }
+            }
+        } catch (Exception e) {
+            Log.e("AadhiAI", "Download status check failed", e);
+        } finally {
+            if (downloadReceiver != null) {
+                try {
+                    unregisterReceiver(downloadReceiver);
+                } catch (Exception ignored) {
+                }
+                downloadReceiver = null;
+            }
+        }
+    }
+
+    private void installDownloadedApk() {
+        try {
+            File file = new File(
+                getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                "AadhiAI-update.apk"
+            );
+
+            if (!file.exists() || file.length() == 0) {
+                Log.e("AadhiAI", "Downloaded APK not found");
+                return;
+            }
+
+            Uri uri = FileProvider.getUriForFile(
+                this,
+                getPackageName() + ".provider",
+                file
+            );
+
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(
+                uri,
+                "application/vnd.android.package-archive"
+            );
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            startActivity(intent);
+
+        } catch (Exception e) {
+            Log.e("AadhiAI", "Installation failed", e);
+        }
     }
 
     private void startListening() {
@@ -170,16 +357,13 @@ public class MainActivity extends Activity {
             }
 
             @Override
-            public void onBeginningOfSpeech() {
-            }
+            public void onBeginningOfSpeech() {}
 
             @Override
-            public void onRmsChanged(float rmsdB) {
-            }
+            public void onRmsChanged(float rmsdB) {}
 
             @Override
-            public void onBufferReceived(byte[] buffer) {
-            }
+            public void onBufferReceived(byte[] buffer) {}
 
             @Override
             public void onEndOfSpeech() {
@@ -215,12 +399,10 @@ public class MainActivity extends Activity {
             }
 
             @Override
-            public void onPartialResults(Bundle partialResults) {
-            }
+            public void onPartialResults(Bundle partialResults) {}
 
             @Override
-            public void onEvent(int eventType, Bundle params) {
-            }
+            public void onEvent(int eventType, Bundle params) {}
         });
 
         Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
@@ -313,6 +495,14 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (downloadReceiver != null) {
+            try {
+                unregisterReceiver(downloadReceiver);
+            } catch (Exception ignored) {
+            }
+            downloadReceiver = null;
+        }
+
         if (tts != null) {
             tts.stop();
             tts.shutdown();
