@@ -10,6 +10,18 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.speech.tts.TextToSpeech;
 import java.util.Locale;
+import android.app.DownloadManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.Settings;
+import androidx.core.content.FileProvider;
+import java.io.File;
 
 public class MainActivity extends Activity {
 
