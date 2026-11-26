@@ -1,6 +1,6 @@
 
 (function () {
-  const CURRENT_VERSION = '1.0.1';
+  const CURRENT_VERSION = '1.0.2';
 
   const UPDATE_VERSION_URL =
     'https://raw.githubusercontent.com/vishnuprabhu683-droid/Aadhi-Buddy/main/android/app/src/main/assets/www/version.json';
