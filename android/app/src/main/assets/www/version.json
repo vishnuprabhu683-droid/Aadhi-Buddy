@@ -1,4 +1,5 @@
 {
-  "version": "1.0.0",
-  "message": "Aadhi AI is up to date!"
+  "version": "1.0.1",
+  "message": "A new Aadhi AI update is available!",
+  "apkUrl": "https://github.com/vishnuprabhu683-droid/Aadhi-Buddy/releases/download/v1.0.1/AadhiAI.apk"
 }
