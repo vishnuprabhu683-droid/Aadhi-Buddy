@@ -30,6 +30,8 @@ public class MainActivity extends Activity {
     private boolean ttsReady = false;
     private String pendingText = "";
     private String pendingLanguage = "en";
+private long downloadId = -1;
+private BroadcastReceiver downloadReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
