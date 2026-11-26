@@ -145,6 +145,7 @@
   document.body.appendChild(overlay);
 
   const content = overlay.querySelector('#aadhi10-content');
+const close = overlay.querySelector('#a10-close');
   const featureNames = [
     ['💬', 'Talk to Aadhi'],
     ['🎤', 'Voice Practice'],
