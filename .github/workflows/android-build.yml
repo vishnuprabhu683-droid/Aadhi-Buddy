@@ -4,9 +4,16 @@ name: Build Aadhi AI APK
 on:
   workflow_dispatch:
   push:
+    branches:
+      - 'main'
     paths:
       - 'android/**'
       - '.github/workflows/android-build.yml'
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -33,22 +40,27 @@ jobs:
         run: |
           echo "$SIGNING_KEY_BASE64" | base64 --decode > android/app/aadhi-release.jks
 
-      - name: Check secret transfer
-        env:
-          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
-        run: |
-          echo "$SIGNING_KEY_BASE64" | tr -d '[:space:]' | wc -c
-          echo "$SIGNING_KEY_BASE64" | tr -d '[:space:]' | sha256sum
-
       - name: Build APK
         env:
           SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
         run: gradle -p android assembleDebug
 
-      - name: Upload APK
+      - name: Prepare release APK
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk AadhiAI.apk
+
+      - name: Upload test APK
         uses: actions/upload-artifact@v4
         with:
           name: Aadhi-AI-Debug-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          path: AadhiAI.apk
 
+      - name: Publish GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Aadhi AI ${{ github.ref_name }}
+          files: AadhiAI.apk
+          generate_release_notes: true
