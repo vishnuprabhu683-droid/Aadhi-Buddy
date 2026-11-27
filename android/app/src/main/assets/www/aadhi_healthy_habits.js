@@ -236,13 +236,34 @@
     return schedules[settings.age] || schedules['4-5'];
   }
 
+  
   function renderDailySchedule() {
-    const schedule = getDailySchedule();
+    const schedule = getDailySchedule().map(item => [...item]);
+
+    function formatTime(value) {
+      const parts = String(value || '').split(':').map(Number);
+      const hours = parts[0];
+      const minutes = parts[1];
+
+      if (!Number.isFinite(hours) || !Number.isFinite(minutes)) {
+        return value;
+      }
+
+      const period = hours >= 12 ? 'PM' : 'AM';
+      const hour = hours % 12 || 12;
+
+      return `${hour}:${String(minutes).padStart(2, '0')} ${period}`;
+    }
+
+    // Use the parent's selected wake-up and bedtime.
+    schedule[0][0] = formatTime(settings.wake);
+    schedule[schedule.length - 1][0] = formatTime(settings.bed);
 
     return `
       <div class="ah-card">
         <h3>🕒 My Daily Routine</h3>
         <p>Follow your day with Aadhi!</p>
+
         ${schedule.map(item => `
           <div style="padding:10px;margin:6px 0;
             background:#f3efff;border-radius:12px;">
@@ -250,6 +271,7 @@
             <div>${item[1]}</div>
           </div>
         `).join('')}
+
         <p class="ah-small">
           Sample routine. Parents can adjust timings
           for school, family and individual needs.
@@ -257,6 +279,7 @@
       </div>
     `;
   }
+
 
 
   function render() {
