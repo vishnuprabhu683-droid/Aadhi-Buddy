@@ -56,6 +56,9 @@
         teeth: false,
         hands: false,
         happy: '',
+sad: '',
+helped: '',
+outdoor: '',
         stars: []
       };
     }
@@ -395,6 +398,26 @@ ${renderDailySchedule()}
         </select>
         <p>${w.happy}</p>
         <textarea id="ah-happy">${r.happy || ''}</textarea>
+        <h3>💭 Let's Talk About Your Day</h3>
+
+        <p>😢 Did anything make you sad today?</p>
+        <textarea id="ah-sad">${r.sad || ''}</textarea>
+
+        <p>🤝 Did you help someone today?</p>
+        <select id="ah-helped">
+          <option value="">Choose</option>
+          <option value="Yes">Yes 😊</option>
+          <option value="A little">A little 🙂</option>
+          <option value="Not today">Not today</option>
+        </select>
+
+        <p>🌳 Did you play outside today?</p>
+        <select id="ah-outdoor">
+          <option value="">Choose</option>
+          <option value="Yes">Yes ⚽</option>
+          <option value="A little">A little 🌼</option>
+          <option value="No">Not today</option>
+        </select>
       </div>
 
       <div class="ah-card">
@@ -436,6 +459,8 @@ ${renderDailySchedule()}
     document.getElementById('ah-parent').onclick = parentSettings;
 
     document.getElementById('ah-mood').value = r.mood;
+    document.getElementById('ah-helped').value = r.helped || '';
+    document.getElementById('ah-outdoor').value = r.outdoor || '';
   }
 
   function saveCheckin() {
@@ -444,6 +469,9 @@ ${renderDailySchedule()}
 
     r.mood = document.getElementById('ah-mood').value;
     r.happy = document.getElementById('ah-happy').value;
+    r.sad = document.getElementById('ah-sad').value;
+    r.helped = document.getElementById('ah-helped').value;
+    r.outdoor = document.getElementById('ah-outdoor').value;
     r.tv = Math.max(0, Number(document.getElementById('ah-tv').value) || 0);
     r.mobile = Math.max(0, Number(document.getElementById('ah-mobile').value) || 0);
     r.play = Math.max(0, Number(document.getElementById('ah-play').value) || 0);
