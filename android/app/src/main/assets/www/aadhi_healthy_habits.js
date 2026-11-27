@@ -386,12 +386,25 @@ ${renderDailySchedule()}
         <button id="ah-settings-save">Save Parent Settings</button>
       </div>
 
-      <div class="ah-card">
-        <h3>Age-based guidance</h3>
-        <p>2 years: 11–14 hours sleep, including naps.</p>
-        <p>3–5 years: 10–13 hours sleep, including naps.</p>
-        <p>6–8 years: 9–12 hours sleep.</p>
-        <p>Screen guidance and activity goals should be adjusted for age.</p>
+            <div class="ah-card">
+        <h3>🌱 Healthy Growth Guide</h3>
+
+        <h4>👶 Ages 2–3</h4>
+        <p>😴 Sleep: 11–14 hours, including naps, for ages 2; 10–13 hours for ages 3–5.</p>
+        <p>📱 Screen time: Keep to about 1 hour or less daily, with quality content and parent support.</p>
+        <p>⚽ Activity: Plenty of active play throughout the day.</p>
+
+        <h4>🧒 Ages 4–5</h4>
+        <p>😴 Sleep: 10–13 hours, including naps if needed.</p>
+        <p>📱 Screen time: About 1 hour or less daily.</p>
+        <p>⚽ Activity: Aim for plenty of movement and outdoor play every day.</p>
+
+        <h4>🎒 Ages 6–8</h4>
+        <p>😴 Sleep: 9–12 hours every night.</p>
+        <p>📱 Screen time: Set consistent family limits.</p>
+        <p>⚽ Activity: Aim for at least 60 minutes of physical activity daily.</p>
+
+        <p>❤️ Every child is different. Parents should adjust routines to the child's needs.</p>
       </div>
     `;
 
