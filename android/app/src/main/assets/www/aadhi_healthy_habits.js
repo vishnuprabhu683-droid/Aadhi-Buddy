@@ -265,6 +265,17 @@
         </div>
       `;
     }
+    const moodCounts = {};
+
+    days.forEach(r => {
+      if (r.mood) {
+        moodCounts[r.mood] = (moodCounts[r.mood] || 0) + 1;
+      }
+    });
+
+    const moodSummary = Object.entries(moodCounts)
+      .map(([mood, count]) => `${mood}: ${count} day(s)`)
+      .join(' • ') || 'No mood check-ins yet';
 
     const averageTV = Math.round(
       days.reduce((sum, r) => sum + (Number(r.tv) || 0), 0) / total
