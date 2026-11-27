@@ -360,7 +360,6 @@
       <h2>🌈 ${w.title}</h2>
       <p>${w.day}</p>
 ${renderDailySchedule()}
-${renderWeeklyReport()}
 
       <div class="ah-card">
         <h3>😊 ${w.mood}</h3>
@@ -499,6 +498,7 @@ ${renderWeeklyReport()}
 
         <p>❤️ Every child is different. Parents should adjust routines to the child's needs.</p>
       </div>
+      ${renderWeeklyReport()}
     `;
 
     document.getElementById('ah-age').value = settings.age;
