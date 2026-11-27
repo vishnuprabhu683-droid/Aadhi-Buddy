@@ -237,6 +237,75 @@
   }
 
   
+  function renderWeeklyReport() {
+    const days = [];
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+
+      const key = [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, '0'),
+        String(date.getDate()).padStart(2, '0')
+      ].join('-');
+
+      const r = settings.records[key];
+
+      if (r) days.push(r);
+    }
+
+    const total = days.length;
+
+    if (!total) {
+      return `
+        <div class="ah-card">
+          <h3>📊 My Weekly Report</h3>
+          <p>Start saving daily check-ins to see your weekly report!</p>
+        </div>
+      `;
+    }
+
+    const averageTV = Math.round(
+      days.reduce((sum, r) => sum + (Number(r.tv) || 0), 0) / total
+    );
+
+    const averageMobile = Math.round(
+      days.reduce((sum, r) => sum + (Number(r.mobile) || 0), 0) / total
+    );
+
+    const averagePlay = Math.round(
+      days.reduce((sum, r) => sum + (Number(r.play) || 0), 0) / total
+    );
+
+    const count = field =>
+      days.filter(r => r[field]).length;
+
+    return `
+      <div class="ah-card">
+        <h3>📊 My Weekly Report</h3>
+        <p>Based on ${total} saved day(s) in the last 7 days.</p>
+
+        <p>📺 Average TV time: ${averageTV} minutes/day</p>
+        <p>📱 Average mobile time: ${averageMobile} minutes/day</p>
+        <p>⚽ Average playtime: ${averagePlay} minutes/day</p>
+
+        <p>💧 Water check-ins: ${count('water')} days</p>
+        <p>🍎 Fruit check-ins: ${count('fruit')} days</p>
+        <p>🪥 Teeth brushing: ${count('teeth')} days</p>
+        <p>🧼 Hand washing: ${count('hands')} days</p>
+
+        <p>⭐ Total healthy habit stars:
+          ${days.reduce((sum, r) => sum + (r.stars || []).length, 0)}
+        </p>
+
+        <p class="ah-small">
+          This report uses saved check-ins only. Missing days are not counted.
+        </p>
+      </div>
+    `;
+  }
+
   function renderDailySchedule() {
     const schedule = getDailySchedule().map(item => [...item]);
 
