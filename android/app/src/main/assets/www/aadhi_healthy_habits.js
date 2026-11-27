@@ -291,6 +291,16 @@
 
     const count = field =>
       days.filter(r => r[field]).length;
+    const habitTotal = total * 4;
+    const completedHabits =
+      count('water') +
+      count('fruit') +
+      count('teeth') +
+      count('hands');
+
+    const progressPercent = Math.round(
+      (completedHabits / habitTotal) * 100
+    );
 
     return `
       <div class="ah-card">
@@ -305,6 +315,7 @@
         <p>🍎 Fruit check-ins: ${count('fruit')} days</p>
         <p>🪥 Teeth brushing: ${count('teeth')} days</p>
         <p>🧼 Hand washing: ${count('hands')} days</p>
+        <p>🌟 Healthy-habit check-in progress: ${progressPercent}%</p>
 
         <p>⭐ Total healthy habit stars:
           ${days.reduce((sum, r) => sum + (r.stars || []).length, 0)}
