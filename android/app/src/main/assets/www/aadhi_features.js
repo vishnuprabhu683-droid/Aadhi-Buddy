@@ -102,11 +102,20 @@
     .a10-routine label { display:block; padding:10px; margin:7px 0;
       background:#f7f3ff; border-radius:10px; }
     #aadhiVoiceOpen {
-      position:fixed; right:14px; bottom:18px; z-index:99992;
-      border:0; border-radius:28px; padding:13px 17px;
-      background:#e65b35; color:white; font-size:15px; font-weight:700;
-      box-shadow:0 4px 14px #0003;
-    }
+  position:fixed;
+  right:14px;
+  bottom:85px;
+  z-index:99992;
+  width:52px;
+  height:52px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:#e65b35;
+  color:white;
+  font-size:23px;
+  box-shadow:0 4px 14px #0003;
+}
     #aadhiVoiceChat {
       display:none; position:fixed; z-index:99999; left:12px; right:12px;
       bottom:76px; max-width:520px; margin:auto; padding:16px;
