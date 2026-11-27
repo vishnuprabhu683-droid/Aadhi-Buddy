@@ -268,6 +268,9 @@ outdoor: '',
         </div>
       `;
     }
+    const helpedDays = days.filter(r => r.helped === 'Yes').length;
+    const outdoorDays = days.filter(r => r.outdoor === 'Yes').length;
+    const sadCheckins = days.filter(r => r.sad && r.sad.trim()).length;
     const moodCounts = {};
 
     days.forEach(r => {
@@ -310,6 +313,9 @@ outdoor: '',
         <h3>📊 My Weekly Report</h3>
         <p>Based on ${total} saved day(s) in the last 7 days.</p>
         <p>😊 Weekly mood summary: ${moodSummary}</p>
+        <p>🤝 Days helped someone: ${helpedDays}</p>
+        <p>🌳 Days played outdoors: ${outdoorDays}</p>
+        <p>💬 Days with a sad reflection: ${sadCheckins}</p>
         <p>📺 Average TV time: ${averageTV} minutes/day</p>
         <p>📱 Average mobile time: ${averageMobile} minutes/day</p>
         <p>⚽ Average playtime: ${averagePlay} minutes/day</p>
