@@ -109,8 +109,47 @@ public class MainActivity extends Activity {
                 }
 
                 tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "aadhi_voice");
+            
             });
         }
+
+        @JavascriptInterface
+        public void scheduleReminder(int minutes) {
+            if (minutes < 15) {
+                minutes = 15;
+            }
+
+            androidx.work.Data reminderData =
+                new androidx.work.Data.Builder()
+                    .putString("title", "Aadhi AI Healthy Reminder")
+                    .putString("message", "Time to drink some water and take a healthy break! 💧")
+                    .build();
+
+            androidx.work.PeriodicWorkRequest reminder =
+                new androidx.work.PeriodicWorkRequest.Builder(
+                    HealthyReminderWorker.class,
+                    minutes,
+                    java.util.concurrent.TimeUnit.MINUTES
+                )
+                .setInputData(reminderData)
+                .build();
+
+            androidx.work.WorkManager
+                .getInstance(MainActivity.this)
+                .enqueueUniquePeriodicWork(
+                    "aadhi_healthy_reminder",
+                    androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+                    reminder
+                );
+        }
+
+        @JavascriptInterface
+        public void cancelReminder() {
+            androidx.work.WorkManager
+                .getInstance(MainActivity.this)
+                .cancelUniqueWork("aadhi_healthy_reminder");
+        }
+    }
 
         @JavascriptInterface
         public void stop() {
