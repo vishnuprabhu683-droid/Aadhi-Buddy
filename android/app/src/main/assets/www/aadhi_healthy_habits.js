@@ -182,6 +182,83 @@
       </label>`;
   }
 
+  function getDailySchedule() {
+    const schedules = {
+      '2-3': [
+        ['6:30 AM', '🌞 Wake up and wash'],
+        ['7:30 AM', '🥣 Healthy breakfast'],
+        ['8:30 AM', '🧸 Free play and toys'],
+        ['9:30 AM', '⚽ Outdoor active play'],
+        ['10:30 AM', '🍎 Fruit snack and water'],
+        ['11:00 AM', '🎨 Drawing, music and stories'],
+        ['12:00 PM', '🍚 Lunch'],
+        ['12:30 PM', '😴 Nap and quiet rest'],
+        ['2:30 PM', '🥛 Wake up and snack'],
+        ['3:30 PM', '🌳 Outdoor family play'],
+        ['5:30 PM', '🧩 Calm indoor play'],
+        ['6:30 PM', '🍲 Dinner'],
+        ['7:00 PM', '🪥 Bath and brushing'],
+        ['7:30 PM', '🌙 Bedtime routine']
+      ],
+      '4-5': [
+        ['6:30 AM', '🌞 Wake up and get ready'],
+        ['7:30 AM', '🥣 Breakfast'],
+        ['8:30 AM', '📚 Preschool learning'],
+        ['9:30 AM', '⚽ Outdoor active play'],
+        ['10:30 AM', '🍎 Snack and water'],
+        ['11:00 AM', '🎨 Art, music and creativity'],
+        ['12:30 PM', '🍚 Lunch'],
+        ['1:00 PM', '😴 Nap or quiet rest'],
+        ['2:30 PM', '🧸 Free play'],
+        ['4:00 PM', '🚴 Outdoor physical activity'],
+        ['5:30 PM', '📖 Stories and family time'],
+        ['6:30 PM', '🍲 Dinner'],
+        ['7:00 PM', '🪥 Brush teeth and get ready'],
+        ['8:00 PM', '🌙 Bedtime']
+      ],
+      '6-8': [
+        ['6:30 AM', '🌞 Wake up and get ready'],
+        ['7:00 AM', '🪥 Brush teeth and breakfast'],
+        ['8:00 AM', '🎒 School or learning time'],
+        ['10:30 AM', '🍎 Snack and water'],
+        ['12:30 PM', '🍚 Lunch'],
+        ['1:30 PM', '📚 School or reading'],
+        ['3:30 PM', '🥛 Snack and relaxation'],
+        ['4:00 PM', '⚽ Outdoor play and exercise'],
+        ['5:30 PM', '✏️ Homework or creative activity'],
+        ['6:30 PM', '🧸 Free play with family'],
+        ['7:00 PM', '🍲 Dinner'],
+        ['7:30 PM', '🪥 Brush teeth and bedtime routine'],
+        ['8:30 PM', '🌙 Bedtime']
+      ]
+    };
+
+    return schedules[settings.age] || schedules['4-5'];
+  }
+
+  function renderDailySchedule() {
+    const schedule = getDailySchedule();
+
+    return `
+      <div class="ah-card">
+        <h3>🕒 My Daily Routine</h3>
+        <p>Follow your day with Aadhi!</p>
+        ${schedule.map(item => `
+          <div style="padding:10px;margin:6px 0;
+            background:#f3efff;border-radius:12px;">
+            <strong>${item[0]}</strong>
+            <div>${item[1]}</div>
+          </div>
+        `).join('')}
+        <p class="ah-small">
+          Sample routine. Parents can adjust timings
+          for school, family and individual needs.
+        </p>
+      </div>
+    `;
+  }
+
+
   function render() {
     const w = words();
     const r = record();
@@ -190,6 +267,7 @@
       <button class="ah-close" id="ah-close">✕ Close</button>
       <h2>🌈 ${w.title}</h2>
       <p>${w.day}</p>
+${renderDailySchedule()}
 
       <div class="ah-card">
         <h3>😊 ${w.mood}</h3>
