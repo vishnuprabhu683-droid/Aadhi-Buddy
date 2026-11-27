@@ -296,7 +296,7 @@
       <div class="ah-card">
         <h3>📊 My Weekly Report</h3>
         <p>Based on ${total} saved day(s) in the last 7 days.</p>
-
+        <p>😊 Weekly mood summary: ${moodSummary}</p>
         <p>📺 Average TV time: ${averageTV} minutes/day</p>
         <p>📱 Average mobile time: ${averageMobile} minutes/day</p>
         <p>⚽ Average playtime: ${averagePlay} minutes/day</p>
