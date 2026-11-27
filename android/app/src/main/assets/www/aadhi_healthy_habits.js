@@ -11,7 +11,7 @@
   const KEY = 'aadhi_healthy_v1';
 
   const defaults = {
-    age: '3-5',
+    age: '4-5',
     language: 'en',
     wake: '06:30',
     bed: '20:00',
