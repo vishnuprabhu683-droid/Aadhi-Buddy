@@ -143,13 +143,12 @@ public class MainActivity extends Activity {
                 );
         }
 
-        @JavascriptInterface
+                @JavascriptInterface
         public void cancelReminder() {
             androidx.work.WorkManager
                 .getInstance(MainActivity.this)
                 .cancelUniqueWork("aadhi_healthy_reminder");
         }
-    }
 
         @JavascriptInterface
         public void stop() {
