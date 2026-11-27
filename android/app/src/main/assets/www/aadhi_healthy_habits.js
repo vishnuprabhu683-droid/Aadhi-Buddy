@@ -360,6 +360,7 @@
       <h2>🌈 ${w.title}</h2>
       <p>${w.day}</p>
 ${renderDailySchedule()}
+${renderWeeklyReport()}
 
       <div class="ah-card">
         <h3>😊 ${w.mood}</h3>
