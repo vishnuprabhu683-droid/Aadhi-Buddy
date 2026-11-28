@@ -647,7 +647,26 @@ function puzzle() {
   voiceButton.id = 'aadhiVoiceOpen';
   voiceButton.textContent = '🎤 Talk to Aadhi';
   voiceButton.style.cssText =
-    'position:fixed;bottom:85px;left:14px;z-index:99998;padding:12px 16px;border:0;border-radius:25px;background:#e53935;  color:#4b287d;font-weight:bold;box-shadow:0 3px 12px #0003;';
+  'position:fixed;' +
+  'bottom:100px;' +
+  'left:14px;' +
+  'z-index:99998;' +
+  'display:flex;' +
+  'align-items:center;' +
+  'justify-content:center;' +
+  'white-space:nowrap;' +
+  'width:auto;' +
+  'height:auto;' +
+  'min-width:0;' +
+  'padding:12px 18px;' +
+  'border:2px solid #e53935;' +
+  'border-radius:30px;' +
+  'background:#ffffff;' +
+  'color:#4b287d;' +
+  'font-size:16px;' +
+  'font-weight:bold;' +
+  'line-height:1.2;' +
+  'box-shadow:0 3px 12px #0003;';
   document.body.appendChild(voiceButton);
 
   const voicePanel = document.createElement('div');
