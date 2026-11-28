@@ -562,20 +562,33 @@ ${renderDailySchedule()}
 
     document.getElementById('ah-back').onclick = render;
 
-    document.getElementById('ah-settings-save').onclick = function () {
-      settings.age = document.getElementById('ah-age').value;
-      settings.language = document.getElementById('ah-language').value;
-      settings.wake = document.getElementById('ah-wake').value;
-      settings.bed = document.getElementById('ah-bed').value;
-      settings.screenLimit = Math.max(1,
-        Number(document.getElementById('ah-limit').value) || 60);
-      settings.breakMinutes = Math.max(1,
-        Number(document.getElementById('ah-break').value) || 10);
-      settings.reminders = document.getElementById('ah-reminders').checked;
-      save();
-      alert('Parent settings saved!');
-      render();
-    };
+document.getElementById('ah-settings-save').onclick = function () {
+  settings.age = document.getElementById('ah-age').value;
+  settings.language = document.getElementById('ah-language').value;
+  settings.wake = document.getElementById('ah-wake').value;
+  settings.bed = document.getElementById('ah-bed').value;
+
+  settings.screenLimit = Math.max(1,
+    Number(document.getElementById('ah-limit').value) || 60);
+
+  settings.breakMinutes = Math.max(15,
+    Number(document.getElementById('ah-break').value) || 30);
+
+  settings.reminders = document.getElementById('ah-reminders').checked;
+
+  save();
+
+  if (window.AadhiVoice) {
+    if (settings.reminders) {
+      window.AadhiVoice.scheduleReminder(settings.breakMinutes);
+    } else {
+      window.AadhiVoice.cancelReminder();
+    }
+  }
+
+  alert('Parent settings saved!');
+  render();
+};
   }
 
   let lastReminder = 0;
