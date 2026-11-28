@@ -48,6 +48,7 @@ public class MainActivity extends Activity {
     private String pendingLanguage = "en-IN";
 
     private static final int MIC_PERMISSION = 101;
+private static final int NOTIFICATION_PERMISSION = 102;
 
     private String pendingApkUrl = null;
     private long downloadId = -1;
