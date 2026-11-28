@@ -81,6 +81,15 @@ private static final int NOTIFICATION_PERMISSION = 102;
         });
 
         webView.loadUrl("file:///android_asset/www/index.html");
+if (Build.VERSION.SDK_INT >= 33 &&
+    checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+        != PackageManager.PERMISSION_GRANTED) {
+
+    requestPermissions(
+        new String[]{Manifest.permission.POST_NOTIFICATIONS},
+        NOTIFICATION_PERMISSION
+    );
+}
     }
 
     public class AadhiVoice {
