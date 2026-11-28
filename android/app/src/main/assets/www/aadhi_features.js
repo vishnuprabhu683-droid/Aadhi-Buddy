@@ -650,20 +650,20 @@ function puzzle() {
   'position:fixed;' +
   'bottom:100px;' +
   'left:14px;' +
+  'right:auto;' +
   'z-index:99998;' +
-  'display:flex;' +
+  'display:inline-flex;' +
   'align-items:center;' +
   'justify-content:center;' +
   'white-space:nowrap;' +
-  'width:auto;' +
-  'height:auto;' +
-  'min-width:0;' +
-  'padding:12px 18px;' +
+  'width:fit-content!important;' +
+  'max-width:calc(100vw - 28px);' +
+  'padding:10px 14px;' +
   'border:2px solid #e53935;' +
   'border-radius:30px;' +
   'background:#ffffff;' +
   'color:#4b287d;' +
-  'font-size:16px;' +
+  'font-size:14px;' +
   'font-weight:bold;' +
   'line-height:1.2;' +
   'box-shadow:0 3px 12px #0003;';
